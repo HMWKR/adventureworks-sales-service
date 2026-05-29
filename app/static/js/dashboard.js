@@ -1,6 +1,8 @@
 /* ============================================================
    AdventureWorks 스토리 대시보드 — ECharts 렌더링
    window.__DATA__ (서버 주입)로부터 차트를 그린다.
+   ⚡ 성능: 7개 차트를 동시에 init 하지 않고, 스크롤 진입 시 지연 초기화
+      (IntersectionObserver) 하여 동시 렌더 부하/버벅임을 제거한다.
    ============================================================ */
 (function () {
   const D = window.__DATA__ || {};
@@ -20,22 +22,36 @@
   const axisStyle = { axisLine: { lineStyle: { color: LINE } }, axisTick: { show: false },
                       axisLabel: { color: INK3, fontSize: 11 } };
   const grid = { left: 8, right: 18, top: 24, bottom: 8, containLabel: true };
-  const charts = [];
-  function mk(id, opt) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const c = echarts.init(el);
-    c.setOption(opt);
-    charts.push(c);
-  }
   const tip = (fmt) => ({ trigger: 'axis', backgroundColor: '#191f28', borderWidth: 0,
     textStyle: { color: '#fff', fontSize: 12 }, padding: [8, 12], formatter: fmt });
 
+  // ── 지연 초기화 레지스트리 ──────────────────────────────
+  const inited = [];
+  const registry = [];               // {el, factory, done}
+  function defer(id, factory) {
+    const el = document.getElementById(id);
+    if (el) registry.push({ el, factory, done: false });
+  }
+  function initChart(reg) {
+    if (reg.done) return;
+    reg.done = true;
+    const c = echarts.init(reg.el);
+    c.setOption(reg.factory());
+    inited.push(c);
+  }
+  const chartIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const reg = registry.find(r => r.el === e.target);
+      if (reg) { initChart(reg); chartIO.unobserve(e.target); }
+    });
+  }, { rootMargin: '120px 0px', threshold: 0.01 });
+
   /* 1) 월별 매출 추이 — 그라데이션 영역 라인 */
-  (function () {
+  defer('chart-monthly', () => {
     const m = C.monthly || [];
     const x = m.map(d => d.YearMonth), y = m.map(d => d.sales_amount);
-    mk('chart-monthly', {
+    return {
       grid, tooltip: tip(p => `${p[0].axisValue}<br/><b>${money(p[0].data)}</b>`),
       xAxis: { type: 'category', data: x, boundaryGap: false, ...axisStyle,
                axisLabel: { color: INK3, fontSize: 10, interval: 5 } },
@@ -49,13 +65,13 @@
         markPoint: { symbolSize: 46, data: [{ type: 'max', name: '최고' }],
           itemStyle: { color: BLUE }, label: { color: '#fff', fontSize: 10, formatter: o => money(o.value) } },
       }],
-    });
-  })();
+    };
+  });
 
   /* 2) 카테고리 구성 — 도넛 */
-  (function () {
+  defer('chart-category', () => {
     const c = C.category || [];
-    mk('chart-category', {
+    return {
       tooltip: { trigger: 'item', backgroundColor: '#191f28', borderWidth: 0,
         textStyle: { color: '#fff' }, formatter: p => `${p.name}<br/><b>${money(p.value)}</b> (${p.percent}%)` },
       legend: { bottom: 0, textStyle: { color: INK2, fontSize: 11 }, icon: 'circle' },
@@ -66,13 +82,13 @@
         label: { formatter: '{b}\n{d}%', color: INK2, fontSize: 11, fontWeight: 600 },
         data: c.map(d => ({ name: d.Category, value: d.sales_amount })),
       }],
-    });
-  })();
+    };
+  });
 
   /* 3) 지역별 매출 TOP — 수평 막대 */
-  (function () {
+  defer('chart-region', () => {
     const r = (C.region || []).slice(0, 10).reverse();
-    mk('chart-region', {
+    return {
       grid: { ...grid, left: 8 }, tooltip: tip(p => `${p[0].axisValue}<br/><b>${money(p[0].data)}</b>`),
       xAxis: { type: 'value', ...axisStyle, splitLine: { lineStyle: { color: LINE } },
                axisLabel: { color: INK3, fontSize: 10, formatter: v => money(v) } },
@@ -81,13 +97,13 @@
       series: [{ type: 'bar', data: r.map(d => d.sales_amount), barWidth: '58%',
         itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 0,
           [{ offset: 0, color: BLUE2 }, { offset: 1, color: BLUE }]), borderRadius: [0, 6, 6, 0] } }],
-    });
-  })();
+    };
+  });
 
   /* 4) 베스트셀러 제품 — 수평 막대 */
-  (function () {
+  defer('chart-products', () => {
     const p = (C.top_products || []).slice(0, 10).reverse();
-    mk('chart-products', {
+    return {
       grid: { ...grid, left: 8 }, tooltip: tip(t => `${t[0].axisValue}<br/><b>${money(t[0].data)}</b>`),
       xAxis: { type: 'value', ...axisStyle, splitLine: { lineStyle: { color: LINE } },
                axisLabel: { color: INK3, fontSize: 10, formatter: v => money(v) } },
@@ -95,13 +111,13 @@
                axisLabel: { color: INK2, fontSize: 10, width: 130, overflow: 'truncate' } },
       series: [{ type: 'bar', data: p.map(d => d.sales_amount), barWidth: '58%',
         itemStyle: { color: '#1bbf83', borderRadius: [0, 6, 6, 0] } }],
-    });
-  })();
+    };
+  });
 
   /* 5) 세그먼트별 고객 수 */
-  (function () {
+  defer('chart-seg-cnt', () => {
     const s = C.segments || [];
-    mk('chart-seg-cnt', {
+    return {
       grid, tooltip: tip(p => `${p[0].axisValue}<br/><b>${p[0].data.toLocaleString()}명</b>`),
       xAxis: { type: 'category', data: s.map(d => d.Segment), ...axisStyle,
                axisLabel: { color: INK2, fontSize: 10, interval: 0, rotate: 18 } },
@@ -109,13 +125,13 @@
                axisLabel: { color: INK3, fontSize: 10 } },
       series: [{ type: 'bar', data: s.map(d => d.customers), barWidth: '52%',
         itemStyle: { color: BLUE, borderRadius: [6, 6, 0, 0] } }],
-    });
-  })();
+    };
+  });
 
   /* 6) 세그먼트별 매출 기여 */
-  (function () {
+  defer('chart-seg-rev', () => {
     const s = C.segments || [];
-    mk('chart-seg-rev', {
+    return {
       grid, tooltip: tip(p => `${p[0].axisValue}<br/><b>${money(p[0].data)}</b>`),
       xAxis: { type: 'category', data: s.map(d => d.Segment), ...axisStyle,
                axisLabel: { color: INK2, fontSize: 10, interval: 0, rotate: 18 } },
@@ -123,22 +139,21 @@
                axisLabel: { color: INK3, fontSize: 10, formatter: v => money(v) } },
       series: [{ type: 'bar', data: s.map(d => d.total_monetary), barWidth: '52%',
         itemStyle: { color: '#845ef7', borderRadius: [6, 6, 0, 0] } }],
-    });
-  })();
+    };
+  });
 
   /* 7) 실제 vs 예측 월매출 — 실선 + 점선 투영 */
-  (function () {
+  defer('chart-forecast', () => {
     const f = C.forecast || { history: [], forecast: [] };
     const hist = f.history || [], fc = f.forecast || [];
     const x = hist.map(d => d.month).concat(fc.map(d => d.month));
     const actual = hist.map(d => d.sales_amount).concat(fc.map(() => null));
-    // 예측선을 실제선 마지막 점에서 이어지게
     const fcVals = fc.map(d => d.forecast_sales_amount);
     const lastActual = hist.length ? hist[hist.length - 1].sales_amount : null;
     const forecast = hist.map(() => null);
     if (hist.length) forecast[hist.length - 1] = lastActual;
     fcVals.forEach(v => forecast.push(v));
-    mk('chart-forecast', {
+    return {
       grid, legend: { top: 0, right: 0, textStyle: { color: INK2, fontSize: 11 },
         data: ['실제', '예측'], icon: 'roundRect' },
       tooltip: tip(p => {
@@ -157,11 +172,14 @@
         { name: '예측', type: 'line', data: forecast, smooth: true, symbol: 'circle', symbolSize: 6,
           lineStyle: { color: '#f04452', width: 3, type: 'dashed' }, itemStyle: { color: '#f04452' } },
       ],
-    });
-  })();
+    };
+  });
+
+  // 관찰 시작(스크롤 진입 시 1개씩 init)
+  registry.forEach(r => chartIO.observe(r.el));
 
   /* 반응형 */
-  window.addEventListener('resize', () => charts.forEach(c => c.resize()));
+  window.addEventListener('resize', () => inited.forEach(c => c.resize()));
 
   /* 스크롤 등장 애니메이션 */
   const io = new IntersectionObserver((entries) => {
