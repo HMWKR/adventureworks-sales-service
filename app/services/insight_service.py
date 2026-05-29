@@ -60,7 +60,7 @@ def generate_insights() -> list[dict]:
         share = _pct(top["total_monetary"], total)
         out.append({
             "icon": "👑", "title": "핵심 고객층",
-            "metric": f"{top['customers']:,}명", "tone": "up",
+            "metric": f"{top['customers']:,}명", "tone": "neutral",
             "text": f"'{top['Segment']}' {top['customers']:,}명이 전체 매출의 "
                     f"{share:.0f}%를 책임지는 우량 고객이에요.",
         })
@@ -75,7 +75,7 @@ def generate_insights() -> list[dict]:
             g = _pct(fa - ra, ra)
             out.append({
                 "icon": "🔮", "title": "향후 6개월 전망",
-                "metric": f"${fa/1_000_000:.1f}M", "tone": "up" if g >= 0 else "down",
+                "metric": f"${fa/1_000_000:.1f}M", "tone": "neutral",
                 "text": f"향후 6개월 월평균 매출은 ${fa/1_000_000:.1f}M, 최근 6개월 대비 "
                         f"{g:+.1f}% 수준으로 전망돼요.",
             })

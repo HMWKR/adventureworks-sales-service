@@ -18,8 +18,9 @@ logger = logging.getLogger("aw.ui")
 # ── 디자인 토큰 / 커스텀 CSS ─────────────────────────────────
 PRIMARY = "#3182f6"
 CSS = """
-/* ── Toss 테마: Gradio CSS 변수 전면 오버라이드 (모든 컴포넌트 상속) ── */
-.gradio-container, .gradio-container.gradio-container {
+/* ── Toss 테마: 다크모드(.dark)에서도 강제 라이트 + 변수 전면 오버라이드 ── */
+html, body, gradio-app, .gradio-container { background: #f9fafb !important; }
+.gradio-container, .gradio-container.gradio-container, .dark, .gradio-container.dark {
   --body-background-fill: #f9fafb !important;
   --background-fill-primary: #ffffff !important;
   --background-fill-secondary: #f9fafb !important;
@@ -33,10 +34,13 @@ CSS = """
   --block-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.05) !important;
   --body-text-color: #191f28 !important;
   --body-text-color-subdued: #8b95a1 !important;
+  --border-color-primary: #e5e8eb !important;
+  --border-color-accent: #3182f6 !important;
   --input-background-fill: #ffffff !important;
   --input-border-color: #e5e8eb !important;
   --input-border-color-focus: #3182f6 !important;
   --input-radius: 12px !important;
+  --input-text-color: #191f28 !important;
   --button-large-radius: 14px !important;
   --button-small-radius: 12px !important;
   --button-primary-background-fill: #3182f6 !important;
@@ -48,11 +52,21 @@ CSS = """
   --color-accent-soft: #eef5ff !important;
   --primary-50:#eef5ff !important; --primary-500: #3182f6 !important; --primary-600: #1b64da !important;
   --link-text-color: #3182f6 !important; --link-text-color-hover: #1b64da !important;
+  --neutral-950:#191f28 !important;
+  --table-even-background-fill: #ffffff !important;
+  --table-odd-background-fill: #f9fafb !important;
+  --table-row-focus: #eef5ff !important;
+  --table-border-color: #f2f4f6 !important;
   --layout-gap: 16px !important;
   font-family: 'Pretendard','Toss Product Sans','Segoe UI','Malgun Gothic',sans-serif !important;
-  max-width: 1080px !important; margin: 0 auto !important;
   background: #f9fafb !important;
 }
+.gradio-container { max-width: 1080px !important; margin: 0 auto !important; }
+/* 데이터프레임(표) 라이트 강제 — '검정 화면' 결함 차단 */
+.gradio-container .table-wrap, .gradio-container table { background:#fff !important; }
+.gradio-container table th { background:#f9fafb !important; color:#4e5968 !important; }
+.gradio-container table td, .gradio-container .cell-wrap span { color:#191f28 !important; }
+.gradio-container table td, .gradio-container table th { border-color:#f2f4f6 !important; }
 /* primary 버튼 */
 .gradio-container .primary, .gradio-container button.primary {
   background: #3182f6 !important; color:#fff !important; font-weight:700 !important;
@@ -214,29 +228,34 @@ def build_demo() -> gr.Blocks:
 
         # ── EDA ──
         with gr.Tab("📊 EDA 분석"):
-            gr.Markdown("월별 추이와 지역·카테고리·채널별 매출 분포를 살펴봅니다.")
+            gr.Markdown("월별 추이와 카테고리·채널·지역별 매출 분포예요. "
+                        "인터랙티브 고급 차트는 [스토리 대시보드](/) 에서 볼 수 있어요.")
             monthly_plot = monthly_df.assign(date=pd.to_datetime(monthly_df["YearMonth"]))
             gr.LinePlot(monthly_plot, x="date", y="sales_amount",
                         title="월별 매출 추이", height=300)
             with gr.Row():
-                gr.BarPlot(region_df, x="Region", y="sales_amount",
-                           title="지역별 매출", height=300)
+                # 4개·2개 라벨이라 막대 라벨이 겹치지 않음
                 gr.BarPlot(category_df, x="Category", y="sales_amount",
                            title="카테고리별 매출", height=300)
-            with gr.Row():
                 gr.BarPlot(channel_df, x="Channel", y="sales_amount",
-                           title="채널별 매출", height=280)
-                gr.Dataframe(monthly_df, label="월별 집계 데이터")
+                           title="채널별 매출", height=300)
+            # 지역은 10개라 막대 라벨이 겹치므로 정렬된 표로 제공(라벨 겹침 결함 차단)
+            region_tbl = region_df.rename(columns={
+                "Region": "지역", "sales_amount": "매출($)",
+                "order_quantity": "수량", "order_lines": "건수"})
+            gr.Dataframe(region_tbl, label="지역별 매출 (매출 내림차순)")
+            gr.Dataframe(monthly_df, label="월별 집계 데이터")
 
         # ── RFM ──
         with gr.Tab("👥 RFM 고객분석"):
-            gr.Markdown("Recency·Frequency·Monetary 기반 고객 세그먼트 분포입니다.")
-            with gr.Row():
-                gr.BarPlot(seg_df, x="Segment", y="customers",
-                           title="세그먼트별 고객 수", height=300)
-                gr.BarPlot(seg_df, x="Segment", y="total_monetary",
-                           title="세그먼트별 총 매출", height=300)
-            gr.Dataframe(seg_df, label="세그먼트 요약")
+            gr.Markdown("Recency·Frequency·Monetary 기반 고객 세그먼트 분포예요.")
+            # 7개 세그먼트(라벨 긺)는 전체 너비 단일 막대로 두어 겹침 방지
+            gr.BarPlot(seg_df, x="Segment", y="customers",
+                       title="세그먼트별 고객 수", height=320)
+            seg_tbl = seg_df.rename(columns={
+                "Segment": "세그먼트", "customers": "고객수",
+                "avg_recency": "평균R", "avg_frequency": "평균F", "total_monetary": "총매출($)"})
+            gr.Dataframe(seg_tbl, label="세그먼트 요약 (총매출 내림차순)")
             gr.Markdown("**Monetary 상위 우수 고객 20**")
             gr.Dataframe(top_df, label="우수 고객")
 

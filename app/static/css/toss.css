@@ -86,7 +86,7 @@ section { padding: 56px 0; }
 @media (max-width:720px){ .kpi + .kpi { border-left: none; padding-left: 0; } }
 
 /* ── 인사이트 카드 ───────────────────────────────────── */
-.insight-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; }
+.insight-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(188px,1fr)); gap: 16px; }
 .insight {
   background: var(--card); border-radius: var(--r); padding: 22px; box-shadow: var(--shadow);
   transition: .18s; border: 1px solid transparent;
@@ -94,9 +94,9 @@ section { padding: 56px 0; }
 .insight:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--blue-50); }
 .insight .ic { font-size: 1.6rem; }
 .insight .t { color: var(--ink-3); font-size: .85rem; font-weight: 700; margin-top: 10px; }
-.insight .m { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; margin: 2px 0 8px; }
-.insight .m.up { color: var(--up); }
-.insight .m.down { color: var(--down); }
+.insight .m { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; margin: 2px 0 8px; color: var(--ink); }
+.insight .m.up { color: var(--green); }    /* 긍정 성장 = 초록(명료) */
+.insight .m.down { color: var(--up); }      /* 감소 = 빨강 */
 .insight .x { color: var(--ink-2); font-size: .94rem; line-height: 1.5; }
 
 /* ── 카드 / 차트 ─────────────────────────────────────── */
@@ -128,6 +128,19 @@ section { padding: 56px 0; }
 /* ── 스크롤 등장 애니메이션 ──────────────────────────── */
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity .5s ease, transform .5s ease; }
 .reveal.show { opacity: 1; transform: none; }
+
+/* ── 모바일 반응형(네비 overflow·히어로 폰트) ──────────── */
+@media (max-width: 640px) {
+  .hero { padding: 48px 0 28px; }
+  .hero h1 { font-size: 1.9rem; }
+  .hero p { font-size: 1.02rem; }
+  .nav .wrap { height: 56px; }
+  .nav .menu { gap: 2px; }
+  .nav .menu a:not(.cta) { display: none; }   /* 모바일: 섹션 앵커 숨기고 CTA만 */
+  .nav .menu a.cta { padding: 8px 12px; font-size: .88rem; }
+  .sec-title { font-size: 1.35rem; }
+  .kpi .v { font-size: 1.6rem; }
+}
 
 /* ============================================================
    예측 플레이그라운드 (커스텀) 컴포넌트
