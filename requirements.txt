@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+gradio
+pandas
+numpy
+scikit-learn
+statsmodels
+openpyxl
+pydantic
+httpx
+pytest

@@ -1,0 +1,108 @@
+{
+  "trained_at": "2026-05-30T01:03:33",
+  "dataset_rows": 121253,
+  "regression": {
+    "n_train": 97002,
+    "n_test": 24251,
+    "r2": 0.9811,
+    "mae": 21.83,
+    "rmse": 234.28,
+    "features": [
+      "Order Quantity",
+      "List Price",
+      "Standard Cost",
+      "Category",
+      "Subcategory",
+      "Channel",
+      "Region"
+    ]
+  },
+  "classification": {
+    "n_train": 15226,
+    "n_test": 3807,
+    "accuracy": 0.7623,
+    "macro_f1": 0.7439,
+    "classes": [
+      "At Risk",
+      "Champions",
+      "Hibernating",
+      "Lost",
+      "Loyal",
+      "Others",
+      "Potential Loyalist"
+    ],
+    "report": {
+      "At Risk": {
+        "precision": 0.9759825327510917,
+        "recall": 0.5464547677261614,
+        "f1-score": 0.700626959247649,
+        "support": 818.0
+      },
+      "Champions": {
+        "precision": 1.0,
+        "recall": 0.9959100204498977,
+        "f1-score": 0.9979508196721312,
+        "support": 489.0
+      },
+      "Hibernating": {
+        "precision": 0.6394849785407726,
+        "recall": 0.9770491803278688,
+        "f1-score": 0.7730220492866408,
+        "support": 305.0
+      },
+      "Lost": {
+        "precision": 0.3225806451612903,
+        "recall": 0.9574468085106383,
+        "f1-score": 0.48257372654155495,
+        "support": 94.0
+      },
+      "Loyal": {
+        "precision": 0.9576271186440678,
+        "recall": 0.5777096114519428,
+        "f1-score": 0.7206632653061225,
+        "support": 978.0
+      },
+      "Others": {
+        "precision": 0.6707317073170732,
+        "recall": 0.8333333333333334,
+        "f1-score": 0.7432432432432432,
+        "support": 594.0
+      },
+      "Potential Loyalist": {
+        "precision": 0.6590621039290241,
+        "recall": 0.9829867674858223,
+        "f1-score": 0.7890743550834598,
+        "support": 529.0
+      },
+      "accuracy": 0.7622800105069608,
+      "macro avg": {
+        "precision": 0.7464955837633315,
+        "recall": 0.8386986413265234,
+        "f1-score": 0.7438792026258287,
+        "support": 3807.0
+      },
+      "weighted avg": {
+        "precision": 0.8395946992511645,
+        "recall": 0.7622800105069608,
+        "f1-score": 0.7633201871832428,
+        "support": 3807.0
+      }
+    }
+  },
+  "timeseries": {
+    "n_months": 36,
+    "seasonal_periods": 12,
+    "in_sample_mae": 553353.26,
+    "in_sample_rmse": 745546.7,
+    "in_sample_mape_pct": 27.52,
+    "backtest_mae": 861696.62,
+    "backtest_rmse": 1136278.09,
+    "backtest_mape_pct": 21.5,
+    "horizon": 6,
+    "forecast_preview": [
+      5081862.86,
+      6537365.63,
+      6164181.37
+    ]
+  }
+}

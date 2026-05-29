@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# 대용량 데이터/모델 산출물 (ETL/학습으로 재생성 — run_pipeline.py)
+data/*.xlsx
+data/*.db
+data/*.csv
+models/*.pkl
+
+# metrics.json 은 커밋 (학습 지표 기록용)
+!models/metrics.json
+
+# 로그/임시
+*.log
+server.log
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+gradio_cached_examples/
+.gradio/
