@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>예측 플레이그라운드 · AdventureWorks</title>
+  <link rel="stylesheet" href="/static/css/toss.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+</head>
+<body>
+  <script>window.__CHOICES__ = {{ choices_json | safe }};</script>
+
+  <nav class="nav"><div class="wrap">
+    <div class="brand">🚲 AdventureWorks</div>
+    <div class="menu">
+      <a href="/">← 스토리 대시보드</a>
+      <a href="/docs" target="_blank">API</a>
+      <a class="cta" href="/gradio">Gradio 버전</a>
+    </div>
+  </div></nav>
+
+  <header class="hero" style="padding:60px 0 30px"><div class="wrap">
+    <span class="badge">PLAYGROUND · 머신러닝 3종</span>
+    <h1 style="font-size:2.2rem">직접 <span class="accent">예측</span>해 보세요.</h1>
+    <p>조건을 입력하면 학습된 모델이 즉시 결과를 알려드려요. 매출·고객 세그먼트·미래 매출 세 가지를 예측할 수 있어요.</p>
+  </div></header>
+
+  <section style="padding-top:8px"><div class="wrap">
+    <!-- 세그먼트 컨트롤 -->
+    <div class="seg" role="tablist">
+      <button class="active" data-tool="sales">💰 매출 예측</button>
+      <button data-tool="segment">🎯 고객 세그먼트</button>
+      <button data-tool="forecast">📈 시계열 예측</button>
+    </div>
+
+    <!-- 1) 매출 예측 -->
+    <div class="tool active" id="tool-sales">
+      <div class="tool-grid">
+        <div class="card">
+          <h3>주문 정보 입력</h3><div class="hint">회귀 모델(RandomForest, R² 0.98)이 매출액을 예측해요.</div>
+          <div class="field-row">
+            <div class="field"><label>주문 수량</label><input type="number" id="s-qty" value="3" min="1"></div>
+            <div class="field"><label>정가 ($)</label><input type="number" id="s-list" value="2000"></div>
+          </div>
+          <div class="field"><label>표준원가 ($)</label><input type="number" id="s-cost" value="1200"></div>
+          <div class="field-row">
+            <div class="field"><label>카테고리</label><select id="s-cat"></select></div>
+            <div class="field"><label>서브카테고리</label><select id="s-sub"></select></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>채널</label><select id="s-ch"></select></div>
+            <div class="field"><label>지역</label><select id="s-region"></select></div>
+          </div>
+          <button class="btn btn-primary btn-block" id="s-go">매출 예측하기</button>
+        </div>
+        <div class="result" id="s-result">
+          <div class="placeholder">왼쪽에 조건을 넣고<br><b>매출 예측하기</b>를 눌러보세요 💰</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2) 고객 세그먼트 -->
+    <div class="tool" id="tool-segment">
+      <div class="tool-grid">
+        <div class="card">
+          <h3>고객 RFM 입력</h3><div class="hint">분류 모델이 고객 세그먼트를 예측해요.</div>
+          <div class="field"><label>Recency · 마지막 구매 후 일수</label><input type="number" id="g-r" value="30" min="0"></div>
+          <div class="field"><label>Frequency · 구매 횟수</label><input type="number" id="g-f" value="5" min="0"></div>
+          <div class="field"><label>Monetary · 총 구매액 ($)</label><input type="number" id="g-m" value="15000" min="0"></div>
+          <button class="btn btn-primary btn-block" id="g-go">세그먼트 예측하기</button>
+        </div>
+        <div class="result" id="g-result">
+          <div class="placeholder">R·F·M 값을 넣고<br><b>세그먼트 예측하기</b>를 눌러보세요 🎯</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3) 시계열 예측 -->
+    <div class="tool" id="tool-forecast">
+      <div class="card">
+        <h3>향후 월매출 전망</h3><div class="hint">Holt-Winters 모델로 미래를 예측해요. (실선=실제, 점선=예측)</div>
+        <div class="field" style="max-width:420px">
+          <label>예측 개월 수 · <b id="f-h-label">6</b>개월</label>
+          <input type="range" id="f-h" min="1" max="24" value="6">
+        </div>
+        <button class="btn btn-primary" id="f-go" style="margin-bottom:18px">예측 실행</button>
+        <div id="chart-forecast" class="chart tall"></div>
+      </div>
+    </div>
+  </div></section>
+
+  <footer class="footer">
+    FastAPI + ECharts · AdventureWorks Sales · 기말과제
+    &nbsp;·&nbsp; <a href="/" style="color:var(--blue)">스토리 대시보드</a>
+    &nbsp;·&nbsp; <a href="/gradio" style="color:var(--blue)">Gradio 버전</a>
+  </footer>
+
+  <script src="/static/js/playground.js"></script>
+</body>
+</html>

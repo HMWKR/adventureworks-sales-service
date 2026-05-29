@@ -15,7 +15,7 @@ Microsoft **AdventureWorks Sales** 데이터를 ETL → 전처리 → EDA/RFM �
 | **ML 회귀** | 매출액 예측 — RandomForestRegressor (R² 0.98) |
 | **ML 분류** | 고객 RFM 세그먼트 분류 — RandomForestClassifier (acc 0.76) |
 | **ML 시계열** | 월매출 예측 — Holt-Winters(damped+가법계절), backtest-MAPE 21.5% |
-| **UI** | Gradio 대시보드(5탭)를 FastAPI에 mount + Swagger 자동 문서 |
+| **UI** | ① 스토리 대시보드(`/`, Jinja2+ECharts+Toss 디자인, 자동 인사이트) ② 예측 플레이그라운드(`/playground`, 커스텀 Toss) ③ Gradio 버전(`/gradio`, Toss 테마 `gr.mount_gradio_app`) ④ Swagger(`/docs`) |
 
 ## 🧭 CRISP-DM 단계 매핑 (PPT 슬라이드 19)
 
@@ -39,12 +39,16 @@ adventureworks_sales_service/
 │   ├── services/            # 비즈니스 로직 (Model)
 │   │   ├── eda_service.py   #   집계
 │   │   ├── rfm_service.py   #   RFM 분석·세그먼트
-│   │   └── ml_service.py    #   모델 로드·추론
+│   │   ├── ml_service.py    #   모델 로드·추론
+│   │   └── insight_service.py  # 자동 인사이트 + 대시보드 페이로드
 │   ├── ml/train.py          # 모델 학습 파이프라인
 │   ├── routers/             # API 엔드포인트 (Controller)
-│   │   ├── eda.py / rfm.py / predict.py
-│   ├── ui/gradio_app.py     # Gradio 대시보드 (View)
-│   └── main.py              # 앱 조립 + Gradio mount + lifespan
+│   │   ├── eda.py / rfm.py / predict.py / insights.py
+│   ├── web/router.py        # 스토리 대시보드(/) + 플레이그라운드(/playground)
+│   ├── templates/           # Jinja2: dashboard.html / playground.html
+│   ├── static/              # Toss CSS + ECharts JS (dashboard.js / playground.js)
+│   ├── ui/gradio_app.py     # Gradio 버전 (Toss 테마, /gradio)
+│   └── main.py              # 앱 조립 + 라우터 + static + Gradio mount + lifespan
 ├── tests/test_api.py        # pytest 17케이스
 ├── run_pipeline.py          # ETL + 학습 일괄 실행
 ├── models/metrics.json      # 학습 지표(커밋)
@@ -70,10 +74,12 @@ python run_pipeline.py
 uvicorn app.main:app --reload
 ```
 
-| 접속 | 주소 |
-|---|---|
-| Gradio 대시보드 | http://127.0.0.1:8000/ |
-| API 문서(Swagger) | http://127.0.0.1:8000/docs |
+| 접속 | 주소 | 설명 |
+|---|---|---|
+| 스토리 대시보드 | http://127.0.0.1:8000/ | 자동 인사이트 + ECharts 시각화 (Toss 디자인) |
+| 예측 플레이그라운드 | http://127.0.0.1:8000/playground | 매출·세그먼트·시계열 예측 (커스텀 Toss) |
+| Gradio 버전 | http://127.0.0.1:8000/gradio | 강의 `gr.mount_gradio_app` 데모 (Toss 테마) |
+| API 문서(Swagger) | http://127.0.0.1:8000/docs | REST API 자동 문서 |
 
 > 첫 실행 시 `data/AdventureWorks_Sales.xlsx`(약 14MB)를 자동 다운로드하고 모델을 학습한다(수십 초~수 분). 대용량 산출물(xlsx/db/csv/pkl)은 `.gitignore` 처리되어 재생성된다.
 

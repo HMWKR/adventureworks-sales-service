@@ -16,27 +16,87 @@ from app.services import eda_service, rfm_service, ml_service
 logger = logging.getLogger("aw.ui")
 
 # ── 디자인 토큰 / 커스텀 CSS ─────────────────────────────────
-PRIMARY = "#4f46e5"
+PRIMARY = "#3182f6"
 CSS = """
-.gradio-container { font-family: 'Pretendard','Segoe UI','Malgun Gothic',sans-serif !important;
-  max-width: 1180px !important; margin: 0 auto !important; }
-#aw-hero { background: linear-gradient(120deg,#4f46e5 0%,#0ea5e9 100%);
-  color:#fff; padding:26px 30px; border-radius:18px; margin-bottom:6px;
-  box-shadow:0 10px 30px rgba(79,70,229,.25); }
-#aw-hero h1 { margin:0; font-size:1.7rem; font-weight:800; letter-spacing:-.01em; }
+/* ── Toss 테마: Gradio CSS 변수 전면 오버라이드 (모든 컴포넌트 상속) ── */
+.gradio-container, .gradio-container.gradio-container {
+  --body-background-fill: #f9fafb !important;
+  --background-fill-primary: #ffffff !important;
+  --background-fill-secondary: #f9fafb !important;
+  --block-background-fill: #ffffff !important;
+  --block-border-color: #f2f4f6 !important;
+  --block-border-width: 1px !important;
+  --block-radius: 18px !important;
+  --block-label-background-fill: #ffffff !important;
+  --block-label-text-color: #4e5968 !important;
+  --block-title-text-color: #191f28 !important;
+  --block-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.05) !important;
+  --body-text-color: #191f28 !important;
+  --body-text-color-subdued: #8b95a1 !important;
+  --input-background-fill: #ffffff !important;
+  --input-border-color: #e5e8eb !important;
+  --input-border-color-focus: #3182f6 !important;
+  --input-radius: 12px !important;
+  --button-large-radius: 14px !important;
+  --button-small-radius: 12px !important;
+  --button-primary-background-fill: #3182f6 !important;
+  --button-primary-background-fill-hover: #1b64da !important;
+  --button-primary-text-color: #ffffff !important;
+  --button-secondary-background-fill: #ffffff !important;
+  --button-secondary-border-color: #e5e8eb !important;
+  --color-accent: #3182f6 !important;
+  --color-accent-soft: #eef5ff !important;
+  --primary-50:#eef5ff !important; --primary-500: #3182f6 !important; --primary-600: #1b64da !important;
+  --link-text-color: #3182f6 !important; --link-text-color-hover: #1b64da !important;
+  --layout-gap: 16px !important;
+  font-family: 'Pretendard','Toss Product Sans','Segoe UI','Malgun Gothic',sans-serif !important;
+  max-width: 1080px !important; margin: 0 auto !important;
+  background: #f9fafb !important;
+}
+/* primary 버튼 */
+.gradio-container .primary, .gradio-container button.primary {
+  background: #3182f6 !important; color:#fff !important; font-weight:700 !important;
+  border:none !important; border-radius:14px !important; box-shadow:none !important;
+}
+.gradio-container .primary:hover, .gradio-container button.primary:hover { background:#1b64da !important; }
+/* 탭 네비 → Toss 세그먼트 컨트롤 느낌 */
+.gradio-container .tab-nav, .gradio-container div[role="tablist"] {
+  border:none !important; gap:4px !important; background:#f2f4f6 !important;
+  padding:5px !important; border-radius:14px !important; display:inline-flex !important;
+}
+.gradio-container .tab-nav button, .gradio-container button[role="tab"] {
+  border:none !important; border-radius:10px !important; color:#4e5968 !important;
+  font-weight:700 !important; padding:9px 16px !important; background:transparent !important;
+}
+.gradio-container .tab-nav button.selected, .gradio-container button[role="tab"][aria-selected="true"] {
+  background:#fff !important; color:#3182f6 !important;
+  box-shadow:0 1px 3px rgba(0,0,0,.08) !important;
+}
+/* 입력/드롭다운 */
+.gradio-container input, .gradio-container select, .gradio-container textarea {
+  border-radius:12px !important; }
+.gradio-container label span, .gradio-container .block-title {
+  color:#4e5968 !important; font-weight:600 !important; }
+.gradio-container .block { box-shadow: var(--block-shadow) !important; }
+
+/* ── 커스텀 히어로 / KPI / 결과 카드 (Toss) ── */
+#aw-hero { background: linear-gradient(120deg,#3182f6 0%,#1b64da 100%);
+  color:#fff; padding:26px 30px; border-radius:20px; margin-bottom:6px;
+  box-shadow:0 10px 30px rgba(49,130,246,.22); }
+#aw-hero h1 { margin:0; font-size:1.7rem; font-weight:800; letter-spacing:-.02em; color:#fff; }
 #aw-hero .sub { opacity:.92; margin-top:4px; font-size:.95rem; }
 .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
   gap:12px; margin-top:18px; }
-.kpi { background:rgba(255,255,255,.14); backdrop-filter:blur(4px);
-  border:1px solid rgba(255,255,255,.22); border-radius:13px; padding:13px 15px; }
+.kpi { background:rgba(255,255,255,.16); backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.24); border-radius:14px; padding:13px 15px; }
 .kpi .num { font-size:1.45rem; font-weight:800; line-height:1.1; }
 .kpi .label { font-size:.78rem; opacity:.9; margin-top:3px; }
-.result-card { border-radius:14px; padding:22px 24px; margin-top:4px;
-  background:linear-gradient(135deg,#eef2ff,#e0f2fe); border:1px solid #c7d2fe; }
-.result-card .big { font-size:2.1rem; font-weight:800; color:#4338ca; }
-.result-card .lbl { color:#475569; font-size:.9rem; font-weight:600; }
-.seg-badge { display:inline-block; padding:6px 16px; border-radius:999px;
-  font-weight:800; font-size:1.15rem; background:#4f46e5; color:#fff; }
+.result-card { border-radius:18px; padding:24px 26px; margin-top:4px;
+  background:linear-gradient(135deg,#eef5ff,#f9fafb); border:1.5px solid #d6e6ff; }
+.result-card .big { font-size:2.4rem; font-weight:800; color:#1b64da; letter-spacing:-.02em; }
+.result-card .lbl { color:#4e5968; font-size:.9rem; font-weight:700; }
+.seg-badge { display:inline-block; padding:8px 20px; border-radius:999px;
+  font-weight:800; font-size:1.3rem; background:#3182f6; color:#fff; }
 .section-title { font-weight:700; font-size:1.05rem; margin:6px 0 2px; }
 footer { display:none !important; }
 """
@@ -232,7 +292,8 @@ def build_demo() -> gr.Blocks:
 
         gr.HTML(
             "<div style='text-align:center;color:#94a3b8;font-size:.82rem;padding:18px'>"
-            "FastAPI + Gradio · AdventureWorks Sales · 기말과제 "
+            "<a href='/' style='color:#3182f6;font-weight:600'>← 스토리 대시보드</a>"
+            "&nbsp;·&nbsp; FastAPI + Gradio · AdventureWorks Sales · 기말과제 "
             "&nbsp;·&nbsp; <a href='/docs' target='_blank' style='color:#6366f1'>API 문서(Swagger) →</a>"
             "</div>"
         )

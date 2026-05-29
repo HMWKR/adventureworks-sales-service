@@ -20,10 +20,38 @@ def test_health(client):
     assert client.get("/health").json()["status"] == "ok"
 
 
-def test_gradio_mounted(client):
+def test_dashboard(client):
+    # "/" 는 커스텀 스토리 대시보드(ECharts + 주입 데이터)
     r = client.get("/")
     assert r.status_code == 200
+    assert "window.__DATA__" in r.text
+    assert "echarts" in r.text.lower()
+
+
+def test_static_assets(client):
+    assert client.get("/static/css/toss.css").status_code == 200
+    assert client.get("/static/js/dashboard.js").status_code == 200
+
+
+def test_playground_custom(client):
+    # /playground 는 커스텀 Toss 페이지(폼 → /api/predict/* fetch)
+    r = client.get("/playground")
+    assert r.status_code == 200
+    assert "window.__CHOICES__" in r.text
+    assert "playground.js" in r.text
+
+
+def test_gradio_version(client):
+    # 강의 요구 Gradio 버전은 /gradio 에 보존
+    r = client.get("/gradio")
+    assert r.status_code == 200
     assert "gradio" in r.text.lower()
+
+
+def test_insights(client):
+    data = client.get("/api/insights").json()
+    assert len(data) >= 3
+    assert {"icon", "title", "metric", "text"} <= set(data[0])
 
 
 def test_swagger(client):

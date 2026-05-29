@@ -6,16 +6,21 @@
 # 실행: uvicorn app.main:app --reload   →  http://127.0.0.1:8000/ (대시보드)
 #                                          http://127.0.0.1:8000/docs (API)
 # ------------------------------------------------------------
+import os
 from contextlib import asynccontextmanager
 
 import gradio as gr
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app import data_access
 from app.services import ml_service
-from app.routers import eda, rfm, predict
+from app.routers import eda, rfm, predict, insights
+from app.web.router import router as web_router
 from app.ui.gradio_app import build_demo
+
+_APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 @asynccontextmanager
@@ -30,14 +35,21 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="AdventureWorks 매출 분석·예측 API",
     description="CRISP-DM 파이프라인 + EDA/RFM + 매출회귀·고객분류·시계열 예측 (기말과제)",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
+
+# 정적 파일 (Toss CSS / ECharts JS)
+app.mount("/static", StaticFiles(directory=os.path.join(_APP_DIR, "static")), name="static")
 
 # JSON API 라우터 (/api 프리픽스)
 app.include_router(eda.router, prefix="/api")
 app.include_router(rfm.router, prefix="/api")
 app.include_router(predict.router, prefix="/api")
+app.include_router(insights.router, prefix="/api")
+
+# 커스텀 스토리 대시보드 ("/")
+app.include_router(web_router)
 
 
 @app.get("/health", tags=["Meta"])
@@ -54,13 +66,16 @@ def api_index():
         "rfm": ["/api/rfm/segments", "/api/rfm/top-customers", "/api/rfm/customer/{buyer}"],
         "predict": ["/api/predict/sales (POST)", "/api/predict/segment (POST)",
                     "/api/predict/forecast"],
-        "docs": "/docs",
+        "insights": ["/api/insights", "/api/insights/dashboard"],
+        "ui": {"dashboard": "/", "playground": "/playground",
+               "gradio": "/gradio", "docs": "/docs"},
     }
 
 
-# Gradio 대시보드를 "/" 에 마운트
+# Gradio 버전(강의 gr.mount_gradio_app 데모)을 "/gradio" 에 보존.
+# 기본 플레이그라운드("/playground")와 대시보드("/")는 커스텀 Toss 페이지가 담당.
 demo = build_demo()
-app = gr.mount_gradio_app(app, demo, path="/")
+app = gr.mount_gradio_app(app, demo, path="/gradio")
 
 
 if __name__ == "__main__":

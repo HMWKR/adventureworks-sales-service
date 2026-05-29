@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdventureWorks 매출 스토리 · 분석·예측 대시보드</title>
+  <link rel="stylesheet" href="/static/css/toss.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+</head>
+<body>
+  <!-- 데이터 주입 (서버 렌더 → 즉시 차트) -->
+  <script>window.__DATA__ = {{ data_json | safe }};</script>
+
+  <!-- 네비 -->
+  <nav class="nav"><div class="wrap">
+    <div class="brand">🚲 AdventureWorks</div>
+    <div class="menu">
+      <a href="#overview">요약</a>
+      <a href="#what">무엇이</a>
+      <a href="#who">누가</a>
+      <a href="#future">미래</a>
+      <a class="cta" href="/playground">예측 해보기 →</a>
+    </div>
+  </div></nav>
+
+  <!-- Hero -->
+  <header class="hero"><div class="wrap">
+    <span class="badge">CRISP-DM · 실데이터 {{ s.n_months }}개월 분석</span>
+    <h1>자전거 매출의 흐름을<br><span class="accent">데이터로 읽다.</span></h1>
+    <p>AdventureWorks {{ "{:,}".format(s.total_order_lines) }}건의 거래를 분석했어요.
+       무엇이 팔리고, 누가 사고, 앞으로 어떻게 될지 — 한 번에 살펴보세요.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="/playground">🔮 매출·고객 예측 직접 해보기</a>
+      <a class="btn btn-ghost" href="#overview">📊 핵심 지표 보기</a>
+    </div>
+  </div></header>
+
+  <!-- Overview: KPI + 자동 인사이트 -->
+  <section id="overview"><div class="wrap">
+    <div class="sec-tag">OVERVIEW</div>
+    <h2 class="sec-title">한눈에 보는 핵심</h2>
+    <p class="sec-desc">데이터가 스스로 찾아낸 가장 중요한 사실들이에요.</p>
+
+    <div class="kpi-strip reveal">
+      <div class="kpi"><div class="v">{{ sh.total_sales }}</div><div class="l">총매출</div></div>
+      <div class="kpi"><div class="v">{{ "{:,}".format(s.total_orders) }}</div><div class="l">주문 수</div></div>
+      <div class="kpi"><div class="v">{{ "{:,}".format(s.unique_buyers) }}</div><div class="l">구매자</div></div>
+      <div class="kpi"><div class="v">{{ "{:,}".format(s.unique_products) }}</div><div class="l">판매 제품</div></div>
+      <div class="kpi"><div class="v">{{ sh.avg_order_value }}</div><div class="l">평균 주문액</div></div>
+    </div>
+
+    <div class="insight-grid" style="margin-top:18px">
+      {% for i in insights %}
+      <div class="insight reveal">
+        <div class="ic">{{ i.icon }}</div>
+        <div class="t">{{ i.title }}</div>
+        <div class="m {{ i.tone }}">{{ i.metric }}</div>
+        <div class="x">{{ i.text }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div></section>
+
+  <!-- What: 무엇이 팔리나 -->
+  <section id="what" style="background:#fff"><div class="wrap">
+    <div class="sec-tag">WHAT</div>
+    <h2 class="sec-title">무엇이 팔리나</h2>
+    <p class="sec-desc">카테고리 구성과 지역·제품 순위로 매출의 원천을 봅니다.</p>
+    <div class="grid-3">
+      <div class="card reveal">
+        <h3>월별 매출 추이</h3><div class="hint">{{ s.date_from }} ~ {{ s.date_to }} · 성장과 계절성</div>
+        <div id="chart-monthly" class="chart tall"></div>
+      </div>
+      <div class="card reveal">
+        <h3>카테고리 구성</h3><div class="hint">매출 비중</div>
+        <div id="chart-category" class="chart tall"></div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:18px">
+      <div class="card reveal">
+        <h3>지역별 매출 TOP</h3><div class="hint">매출 상위 지역</div>
+        <div id="chart-region" class="chart"></div>
+      </div>
+      <div class="card reveal">
+        <h3>베스트셀러 제품</h3><div class="hint">매출 상위 10개</div>
+        <div id="chart-products" class="chart"></div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- Who: 누가 사나 -->
+  <section id="who"><div class="wrap">
+    <div class="sec-tag">WHO</div>
+    <h2 class="sec-title">누가 사나</h2>
+    <p class="sec-desc">RFM(최근성·빈도·금액)으로 고객을 세그먼트로 나눴어요.</p>
+    <div class="grid-2">
+      <div class="card reveal">
+        <h3>세그먼트별 고객 수</h3><div class="hint">고객 분포</div>
+        <div id="chart-seg-cnt" class="chart"></div>
+      </div>
+      <div class="card reveal">
+        <h3>세그먼트별 매출 기여</h3><div class="hint">누가 매출을 만드나</div>
+        <div id="chart-seg-rev" class="chart"></div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- Future: 미래 + CTA -->
+  <section id="future" style="background:#fff"><div class="wrap">
+    <div class="sec-tag">FUTURE</div>
+    <h2 class="sec-title">앞으로는 어떻게</h2>
+    <p class="sec-desc">Holt-Winters 시계열 모델로 향후 6개월 매출을 전망했어요.</p>
+    <div class="card reveal" style="margin-bottom:20px">
+      <h3>실제 vs 예측 월매출</h3><div class="hint">실선=실제 · 점선=예측</div>
+      <div id="chart-forecast" class="chart tall"></div>
+    </div>
+    <div class="spotlight reveal">
+      <div>
+        <div class="big">직접 예측해 보세요</div>
+        <div class="sub">주문 조건을 넣으면 매출을, R·F·M을 넣으면 고객 세그먼트를 예측해 드려요.</div>
+      </div>
+      <a class="btn btn-ghost" href="/playground">예측 플레이그라운드 열기 →</a>
+    </div>
+  </div></section>
+
+  <footer class="footer">
+    FastAPI + Gradio + ECharts · AdventureWorks Sales · 기말과제
+    &nbsp;·&nbsp; <a href="/docs" style="color:var(--blue)">API 문서</a>
+    &nbsp;·&nbsp; <a href="/playground" style="color:var(--blue)">예측 플레이그라운드</a>
+  </footer>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
