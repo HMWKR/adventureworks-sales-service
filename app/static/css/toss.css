@@ -48,6 +48,19 @@ a { color: inherit; text-decoration: none; }
 .nav .menu a:hover { background: var(--line); color: var(--ink); }
 .nav .menu a.cta { background: var(--blue); color: #fff; }
 .nav .menu a.cta:hover { background: var(--blue-dark); }
+.lang-btn { border: 1px solid var(--line); background: #fff; color: var(--ink2);
+  font-weight: 700; font-size: .9rem; padding: 7px 12px; border-radius: 10px; cursor: pointer;
+  font-family: inherit; }
+.lang-btn:hover { background: var(--blue-50); color: var(--blue-dark); border-color: var(--blue-50); }
+
+/* 용어집(Glossary) */
+.gloss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 760px){ .gloss-grid { grid-template-columns: 1fr; } }
+.gloss-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.gloss-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: .9rem; }
+.gloss-table .en { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.gloss-table .ko { color: var(--blue-dark); font-weight: 600; white-space: nowrap; }
+.gloss-table .ds { color: var(--ink2); }
 
 /* ── 섹션 공통 ───────────────────────────────────────── */
 section { padding: 56px 0; }

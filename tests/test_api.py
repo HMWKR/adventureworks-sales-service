@@ -54,6 +54,16 @@ def test_insights(client):
     assert {"icon", "title", "metric", "text"} <= set(data[0])
 
 
+def test_glossary(client):
+    # 용어집(영→한 뜻) API — 카테고리/채널/지역/세그먼트
+    g = client.get("/api/glossary").json()
+    assert "glossary" in g and "kinds" in g
+    gl = g["glossary"]
+    assert {"category", "channel", "region", "segment"} <= set(gl)
+    assert gl["category"]["Bikes"]["ko"] == "자전거"
+    assert gl["channel"]["Reseller"]["ko"]  # 한국어 라벨 존재
+
+
 def test_swagger(client):
     assert client.get("/docs").status_code == 200
     assert client.get("/openapi.json").status_code == 200

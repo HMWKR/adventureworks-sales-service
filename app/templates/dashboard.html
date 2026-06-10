@@ -19,6 +19,8 @@
       <a href="#what">무엇이</a>
       <a href="#who">누가</a>
       <a href="#future">미래</a>
+      <a href="#glossary">용어</a>
+      <button id="lang-toggle" class="lang-btn" title="차트 라벨 언어 전환">🌐 <span id="lang-label">한국어</span></button>
       <a class="cta" href="/playground">예측 해보기 →</a>
     </div>
   </div></nav>
@@ -120,6 +122,26 @@
         <div class="sub">주문 조건을 넣으면 매출을, R·F·M을 넣으면 고객 세그먼트를 예측해 드려요.</div>
       </div>
       <a class="btn btn-ghost" href="/playground">예측 플레이그라운드 열기 →</a>
+    </div>
+  </div></section>
+
+  <!-- Glossary: 용어 설명 -->
+  <section id="glossary"><div class="wrap">
+    <div class="sec-tag">GLOSSARY</div>
+    <h2 class="sec-title">용어 설명</h2>
+    <p class="sec-desc">영어로 된 카테고리·채널·지역·세그먼트가 각각 무슨 뜻인지 정리했어요.
+       상단 <b>🌐 토글</b>로 차트 라벨을 한국어/영어로 바꿀 수 있어요.</p>
+    <div class="gloss-grid">
+      {% for kind, items in glossary.items() %}
+      <div class="card reveal">
+        <h3>{{ {'category':'🚲 상품 카테고리','channel':'🛒 판매 채널','region':'📍 영업 지역','segment':'👥 고객 세그먼트(RFM)'}[kind] }}</h3>
+        <table class="gloss-table">
+          {% for en, v in items.items() %}
+          <tr><td class="en">{{ en }}</td><td class="ko">{{ v.ko }}</td><td class="ds">{{ v.desc }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endfor %}
     </div>
   </div></section>
 

@@ -36,6 +36,7 @@ Microsoft **AdventureWorks(자전거 용품 도소매)** 매출 데이터를 **�
 | **화면** | 스토리 대시보드(`/`) · 예측 플레이그라운드(`/playground`) · Gradio(`/gradio`) · Swagger(`/docs`) |
 | **기술** | FastAPI · pandas · scikit-learn · statsmodels · Jinja2 · ECharts · Gradio |
 | **설계** | MVC 레이어드 아키텍처 + Toss 스타일 디자인 시스템 |
+| **다국어** | 영어 용어의 한국어 뜻·설명 **용어집** + 대시보드 **🌐 한/영 차트 라벨 토글** + 플레이그라운드 이중표기 드롭다운 |
 
 ---
 
@@ -228,6 +229,7 @@ uvicorn app.main:app --reload
 |---|---|---|
 | GET | `/api/insights` | 자동 인사이트 배열 `[{icon, title, metric, text}]` |
 | GET | `/api/insights/dashboard` | 대시보드 전체 데이터 번들(차트+인사이트) |
+| GET | `/api/glossary` | 용어집 — 카테고리·채널·지역·세그먼트의 한국어 뜻·설명 |
 | GET | `/api` | API 인덱스(섹션별 엔드포인트 목록) |
 | GET | `/health` | `{status: "ok"}` |
 

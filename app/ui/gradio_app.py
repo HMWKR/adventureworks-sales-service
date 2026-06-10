@@ -343,6 +343,16 @@ def build_demo() -> gr.Blocks:
             fc_table = gr.Dataframe(label="예측 결과")
             fc_btn.click(_forecast, [horizon], [fc_plot, fc_table])
 
+        # ── 용어 설명 (영어 → 한국어) ──
+        with gr.Tab("📖 용어 설명"):
+            gr.Markdown("영어로 된 **카테고리·채널·지역·세그먼트**가 각각 무슨 뜻인지 정리했어요.")
+            from app import i18n
+            for kind, items in i18n.get_glossary().items():
+                gr.Markdown(f"#### {i18n.KIND_LABEL.get(kind, kind)}")
+                gdf = pd.DataFrame(
+                    [{"English": en, "한국어": v["ko"], "의미": v["desc"]} for en, v in items.items()])
+                gr.Dataframe(gdf, label=None)
+
         gr.HTML(
             "<div style='text-align:center;color:#94a3b8;font-size:.82rem;padding:18px'>"
             "<a href='/' style='color:#3182f6;font-weight:600'>← 스토리 대시보드</a>"

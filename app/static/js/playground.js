@@ -7,8 +7,14 @@
   const money = (v) => v == null ? '-' :
     (Math.abs(v) >= 1e6 ? '$' + (v / 1e6).toFixed(2) + 'M'
       : '$' + Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 }));
-  const fill = (sel, arr, pref) => {
-    sel.innerHTML = arr.map(v => `<option ${v === pref ? 'selected' : ''}>${v}</option>`).join('');
+  const GLO = window.__GLOSSARY__ || {};
+  // value 는 영어(모델 입력값) 유지, 표시 텍스트만 "English · 한국어"
+  const fill = (sel, arr, pref, kind) => {
+    const g = (kind && GLO[kind]) || {};
+    sel.innerHTML = arr.map(v => {
+      const ko = g[v] ? ' · ' + g[v].ko : '';
+      return `<option value="${v}" ${v === pref ? 'selected' : ''}>${v}${ko}</option>`;
+    }).join('');
   };
   const spin = (el) => { el.className = 'result'; el.innerHTML = '<div class="spin"></div>'; };
   const errCard = (el, msg) => {
@@ -17,14 +23,14 @@
   };
 
   /* 드롭다운 채우기 */
-  fill($('s-cat'), CH.categories || [], 'Bikes');
+  fill($('s-cat'), CH.categories || [], 'Bikes', 'category');
   fill($('s-sub'), CH.subcategories || [], 'Road Bikes');
-  fill($('s-ch'), CH.channels || [], 'Reseller');
-  fill($('s-region'), CH.regions || [], 'Southwest');
+  fill($('s-ch'), CH.channels || [], 'Reseller', 'channel');
+  fill($('s-region'), CH.regions || [], 'Southwest', 'region');
   // 구매 예측 드롭다운
-  fill($('b-region'), CH.regions || [], 'Southwest');
-  fill($('b-ch'), CH.channels || [], 'Reseller');
-  fill($('b-cat'), CH.categories || [], 'Bikes');
+  fill($('b-region'), CH.regions || [], 'Southwest', 'region');
+  fill($('b-ch'), CH.channels || [], 'Reseller', 'channel');
+  fill($('b-cat'), CH.categories || [], 'Bikes', 'category');
 
   /* 세그먼트 컨트롤 */
   document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {

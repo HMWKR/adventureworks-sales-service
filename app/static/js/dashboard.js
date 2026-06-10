@@ -7,6 +7,15 @@
 (function () {
   const D = window.__DATA__ || {};
   const C = (D.charts) || {};
+  const G = D.glossary || {};
+
+  // 언어 상태(localStorage) + 라벨 번역기
+  let LANG = 'ko';
+  try { LANG = localStorage.getItem('aw_lang') || 'ko'; } catch (e) {}
+  const tr = (kind, v) => {
+    const g = G[kind];
+    return (LANG === 'ko' && g && g[v]) ? g[v].ko : v;
+  };
 
   // 디자인 토큰(차트용)
   const BLUE = '#3182f6', BLUE2 = '#69a7ff', INK2 = '#4e5968', INK3 = '#8b95a1', LINE = '#f2f4f6';
@@ -80,7 +89,7 @@
         type: 'pie', radius: ['46%', '72%'], center: ['50%', '44%'], avoidLabelOverlap: true,
         itemStyle: { borderColor: '#fff', borderWidth: 3, borderRadius: 6 },
         label: { formatter: '{b}\n{d}%', color: INK2, fontSize: 11, fontWeight: 600 },
-        data: c.map(d => ({ name: d.Category, value: d.sales_amount })),
+        data: c.map(d => ({ name: tr('category', d.Category), value: d.sales_amount })),
       }],
     };
   });
@@ -92,7 +101,7 @@
       grid: { ...grid, left: 8 }, tooltip: tip(p => `${p[0].axisValue}<br/><b>${money(p[0].data)}</b>`),
       xAxis: { type: 'value', ...axisStyle, splitLine: { lineStyle: { color: LINE } },
                axisLabel: { color: INK3, fontSize: 10, formatter: v => money(v) } },
-      yAxis: { type: 'category', data: r.map(d => d.Region), ...axisStyle,
+      yAxis: { type: 'category', data: r.map(d => tr('region', d.Region)), ...axisStyle,
                axisLabel: { color: INK2, fontSize: 11 } },
       series: [{ type: 'bar', data: r.map(d => d.sales_amount), barWidth: '58%',
         itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 0,
@@ -119,7 +128,7 @@
     const s = C.segments || [];
     return {
       grid, tooltip: tip(p => `${p[0].axisValue}<br/><b>${p[0].data.toLocaleString()}명</b>`),
-      xAxis: { type: 'category', data: s.map(d => d.Segment), ...axisStyle,
+      xAxis: { type: 'category', data: s.map(d => tr('segment', d.Segment)), ...axisStyle,
                axisLabel: { color: INK2, fontSize: 10, interval: 0, rotate: 18 } },
       yAxis: { type: 'value', ...axisStyle, splitLine: { lineStyle: { color: LINE } },
                axisLabel: { color: INK3, fontSize: 10 } },
@@ -133,7 +142,7 @@
     const s = C.segments || [];
     return {
       grid, tooltip: tip(p => `${p[0].axisValue}<br/><b>${money(p[0].data)}</b>`),
-      xAxis: { type: 'category', data: s.map(d => d.Segment), ...axisStyle,
+      xAxis: { type: 'category', data: s.map(d => tr('segment', d.Segment)), ...axisStyle,
                axisLabel: { color: INK2, fontSize: 10, interval: 0, rotate: 18 } },
       yAxis: { type: 'value', ...axisStyle, splitLine: { lineStyle: { color: LINE } },
                axisLabel: { color: INK3, fontSize: 10, formatter: v => money(v) } },
@@ -180,6 +189,16 @@
 
   /* 반응형 */
   window.addEventListener('resize', () => inited.forEach(c => c.resize()));
+
+  /* 언어 토글 (한국어 ↔ EN) — 차트 라벨 전환 */
+  const langBtn = document.getElementById('lang-toggle');
+  const langLabel = document.getElementById('lang-label');
+  if (langLabel) langLabel.textContent = (LANG === 'ko') ? '한국어' : 'EN';
+  if (langBtn) langBtn.addEventListener('click', () => {
+    const next = (LANG === 'ko') ? 'en' : 'ko';
+    try { localStorage.setItem('aw_lang', next); } catch (e) {}
+    location.reload();   // 서버 주입 데이터라 빠르게 재렌더
+  });
 
   /* 스크롤 등장 애니메이션 */
   const io = new IntersectionObserver((entries) => {

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app import data_access
+from app import data_access, i18n
 from app.services import insight_service
 
 _APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # app/
@@ -28,6 +28,7 @@ def dashboard(request: Request):
         "s": payload["summary"],
         "sh": payload["summary_human"],
         "insights": payload["insights"],
+        "glossary": payload["glossary"],
     })
 
 
@@ -44,4 +45,5 @@ def playground(request: Request):
     return templates.TemplateResponse("playground.html", {
         "request": request,
         "choices_json": json.dumps(choices, ensure_ascii=False),
+        "glossary_json": json.dumps(i18n.get_glossary(), ensure_ascii=False),
     })

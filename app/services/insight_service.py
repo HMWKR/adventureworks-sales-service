@@ -3,7 +3,7 @@
 # 집계/RFM/예측 결과로부터 "사람이 읽는 한 문장 인사이트"를 자동 생성하고,
 # 스토리 대시보드가 쓸 차트 데이터 번들을 한 번에 조립한다(서버 주입용).
 # ------------------------------------------------------------
-from app import data_access
+from app import data_access, i18n
 from app.services import eda_service, rfm_service, ml_service
 
 
@@ -111,6 +111,7 @@ def build_dashboard_payload() -> dict:
             "avg_order_value": _humanize(summ["avg_order_value"]),
         },
         "insights": generate_insights(),
+        "glossary": i18n.get_glossary(),
         "charts": {
             "monthly": monthly,
             "category": cats,

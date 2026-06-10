@@ -57,6 +57,13 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/api/glossary", tags=["Meta"])
+def glossary():
+    """카테고리·채널·지역·세그먼트의 한국어 뜻·설명(용어집)."""
+    from app import i18n
+    return {"kinds": i18n.KIND_LABEL, "glossary": i18n.get_glossary()}
+
+
 @app.get("/api", tags=["Meta"])
 def api_index():
     """API 엔드포인트 안내."""
