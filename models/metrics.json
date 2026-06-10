@@ -1,12 +1,12 @@
 {
-  "trained_at": "2026-05-30T01:03:33",
-  "dataset_rows": 121253,
+  "trained_at": "2026-06-10T15:39:46",
+  "dataset_rows": 117166,
   "regression": {
-    "n_train": 97002,
-    "n_test": 24251,
-    "r2": 0.9811,
-    "mae": 21.83,
-    "rmse": 234.28,
+    "n_train": 93732,
+    "n_test": 23434,
+    "r2": 0.9879,
+    "mae": 16.26,
+    "rmse": 145.79,
     "features": [
       "Order Quantity",
       "List Price",
@@ -17,11 +17,27 @@
       "Region"
     ]
   },
+  "buy_classification": {
+    "n_train": 60902,
+    "n_test": 15226,
+    "positives": 32977,
+    "negatives": 43151,
+    "accuracy": 0.9324,
+    "f1": 0.9225,
+    "roc_auc": 0.987,
+    "features": [
+      "prior_orders",
+      "prior_monetary",
+      "Region",
+      "Channel",
+      "Category"
+    ]
+  },
   "classification": {
-    "n_train": 15226,
+    "n_train": 15225,
     "n_test": 3807,
-    "accuracy": 0.7623,
-    "macro_f1": 0.7439,
+    "accuracy": 0.7581,
+    "macro_f1": 0.7414,
     "classes": [
       "At Risk",
       "Champions",
@@ -33,58 +49,58 @@
     ],
     "report": {
       "At Risk": {
-        "precision": 0.9759825327510917,
-        "recall": 0.5464547677261614,
-        "f1-score": 0.700626959247649,
+        "precision": 0.973741794310722,
+        "recall": 0.5440097799511002,
+        "f1-score": 0.6980392156862745,
         "support": 818.0
       },
       "Champions": {
-        "precision": 1.0,
+        "precision": 0.9979508196721312,
         "recall": 0.9959100204498977,
-        "f1-score": 0.9979508196721312,
+        "f1-score": 0.9969293756397134,
         "support": 489.0
       },
       "Hibernating": {
-        "precision": 0.6394849785407726,
-        "recall": 0.9770491803278688,
-        "f1-score": 0.7730220492866408,
-        "support": 305.0
+        "precision": 0.6434782608695652,
+        "recall": 0.9801324503311258,
+        "f1-score": 0.7769028871391076,
+        "support": 302.0
       },
       "Lost": {
-        "precision": 0.3225806451612903,
-        "recall": 0.9574468085106383,
-        "f1-score": 0.48257372654155495,
-        "support": 94.0
+        "precision": 0.3219178082191781,
+        "recall": 0.9894736842105263,
+        "f1-score": 0.48578811369509045,
+        "support": 95.0
       },
       "Loyal": {
-        "precision": 0.9576271186440678,
-        "recall": 0.5777096114519428,
-        "f1-score": 0.7206632653061225,
+        "precision": 0.9618717504332756,
+        "recall": 0.5674846625766872,
+        "f1-score": 0.7138263665594855,
         "support": 978.0
       },
       "Others": {
-        "precision": 0.6707317073170732,
-        "recall": 0.8333333333333334,
-        "f1-score": 0.7432432432432432,
-        "support": 594.0
+        "precision": 0.6639566395663956,
+        "recall": 0.8221476510067114,
+        "f1-score": 0.7346326836581709,
+        "support": 596.0
       },
       "Potential Loyalist": {
-        "precision": 0.6590621039290241,
-        "recall": 0.9829867674858223,
-        "f1-score": 0.7890743550834598,
+        "precision": 0.6528301886792452,
+        "recall": 0.9810964083175804,
+        "f1-score": 0.783987915407855,
         "support": 529.0
       },
-      "accuracy": 0.7622800105069608,
+      "accuracy": 0.7580772261623325,
       "macro avg": {
-        "precision": 0.7464955837633315,
-        "recall": 0.8386986413265234,
-        "f1-score": 0.7438792026258287,
+        "precision": 0.7451067516786447,
+        "recall": 0.8400363795490897,
+        "f1-score": 0.7414437939693854,
         "support": 3807.0
       },
       "weighted avg": {
-        "precision": 0.8395946992511645,
-        "recall": 0.7622800105069608,
-        "f1-score": 0.7633201871832428,
+        "precision": 0.8382472456122694,
+        "recall": 0.7580772261623325,
+        "f1-score": 0.7591179298771836,
         "support": 3807.0
       }
     }
@@ -92,17 +108,17 @@
   "timeseries": {
     "n_months": 36,
     "seasonal_periods": 12,
-    "in_sample_mae": 553353.26,
-    "in_sample_rmse": 745546.7,
-    "in_sample_mape_pct": 27.52,
-    "backtest_mae": 861696.62,
-    "backtest_rmse": 1136278.09,
-    "backtest_mape_pct": 21.5,
+    "in_sample_mae": 413210.82,
+    "in_sample_rmse": 558041.43,
+    "in_sample_mape_pct": 23.66,
+    "backtest_mae": 733544.88,
+    "backtest_rmse": 926005.75,
+    "backtest_mape_pct": 19.35,
     "horizon": 6,
     "forecast_preview": [
-      5081862.86,
-      6537365.63,
-      6164181.37
+      3919427.48,
+      5085290.5,
+      4672018.23
     ]
   }
 }

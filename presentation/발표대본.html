@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기말과제 발표 대본 · AdventureWorks</title>
+<style>
+  :root{--blue:#3182f6;--dark:#1b64da;--ink:#191f28;--ink2:#4e5968;--ink3:#8b95a1;
+        --line:#eef1f5;--bg:#f9fafb;--green:#1bbf83;--amber:#ff9500;--red:#f04452;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Pretendard','Segoe UI','Malgun Gothic',sans-serif;background:var(--bg);
+       color:var(--ink);line-height:1.6;}
+  .wrap{max-width:900px;margin:0 auto;padding:32px 24px 80px;}
+  .hero{background:linear-gradient(120deg,#3182f6,#1b64da);color:#fff;border-radius:20px;
+        padding:30px 34px;box-shadow:0 10px 30px rgba(49,130,246,.22);}
+  .hero h1{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;}
+  .hero .sub{opacity:.92;margin-top:6px;font-size:1rem;}
+  .hero .time{display:inline-block;margin-top:14px;background:rgba(255,255,255,.18);
+              border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 16px;font-weight:700;}
+  h2{font-size:1.2rem;margin:34px 0 12px;font-weight:800;letter-spacing:-.01em;
+     border-left:5px solid var(--blue);padding-left:12px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 22px;
+        box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:14px;}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;
+        box-shadow:0 1px 3px rgba(0,0,0,.04);font-size:.95rem;}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{background:#f3f6fb;color:var(--ink2);font-weight:700;font-size:.85rem;}
+  .nums{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+  .chip{background:#eef5ff;color:var(--dark);font-weight:800;border-radius:999px;padding:8px 14px;font-size:.95rem;}
+  /* 대본 블록 */
+  .beat{display:grid;grid-template-columns:96px 1fr;gap:16px;background:#fff;border:1px solid var(--line);
+        border-radius:16px;padding:18px 20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .beat .t{font-weight:800;color:var(--blue);font-size:.95rem;border-right:2px solid var(--line);}
+  .beat .title{font-weight:800;font-size:1.05rem;margin-bottom:4px;}
+  .beat .cue{display:inline-block;background:#fff4e5;color:#a85b00;border:1px solid #ffe0b3;
+             border-radius:8px;padding:2px 10px;font-size:.8rem;font-weight:700;margin-bottom:8px;}
+  .beat .say{font-size:1.08rem;line-height:1.75;color:var(--ink);}
+  .beat .say b{color:var(--dark);}
+  .beat.crm{border-color:#bfdcff;background:linear-gradient(180deg,#f5f9ff,#fff);}
+  ul{margin:6px 0 0 20px;}li{margin:6px 0;}
+  .qa b{color:var(--dark);}
+  .footnote{color:var(--ink3);font-size:.85rem;margin-top:8px;}
+  @media print{
+    body{background:#fff;}.wrap{max-width:none;padding:0 6mm;}
+    .hero{box-shadow:none;}.card,.beat,table{box-shadow:none;break-inside:avoid;}
+    h2{break-after:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>🚲 기말과제 발표 대본</h1>
+    <div class="sub">AdventureWorks 매출 분석·예측 서비스 — "무엇이 팔리나, 누가 살 것인가" (CRM)</div>
+    <span class="time">⏱ 목표 2분 50초 · 5분 한도 내</span>
+  </div>
+
+  <h2>한 장 요약 — 채점 전략</h2>
+  <table>
+    <tr><th>채점(배점)</th><th>이 발표가 노리는 것</th></tr>
+    <tr><td><b>스토리텔링 (30)</b></td><td>"무엇이 팔리나 → 누가 사나 → 누가 <b>살 것인가</b> → 그래서 뭘 할까" 4막</td></tr>
+    <tr><td><b>창의성 (40)</b></td><td>① '안 산 기록' 없는 데이터에서 <b>negative sampling</b>으로 Buy/Not 문제 창조 ② 분석을 <b>쓸 수 있는 서비스</b>로 ③ <b>데이터가 스스로 말하는 인사이트</b></td></tr>
+    <tr><td><b>전달력 (30)</b></td><td>Toss풍 화면 — 설명 없이 읽힘. 발표자는 "왜 중요한지"만</td></tr>
+  </table>
+  <div class="nums">
+    <span class="chip">거래 12만 건</span><span class="chip">36개월</span><span class="chip">매출 $93.5M</span>
+    <span class="chip">자전거 = 매출 87%</span><span class="chip">고객 13% → 매출 68%</span>
+    <span class="chip">구매예측 ROC-AUC 0.99</span><span class="chip">매출회귀 R² 0.99</span>
+  </div>
+
+  <h2>화면 큐 시트</h2>
+  <table>
+    <tr><th>시점</th><th>화면</th><th>URL</th></tr>
+    <tr><td>오프닝~EDA</td><td>스토리 대시보드 (위→아래 스크롤)</td><td><code>/</code></td></tr>
+    <tr><td>예측</td><td>플레이그라운드 → 🛒 구매 → 💰 매출</td><td><code>/playground</code></td></tr>
+    <tr><td>마무리</td><td>대시보드 복귀</td><td><code>/</code></td></tr>
+  </table>
+  <div class="footnote">발표 전 <code>uvicorn app.main:app --reload</code> 실행 + 두 탭 미리 열어두기.</div>
+
+  <h2>발표 대본</h2>
+
+  <div class="beat">
+    <div class="t">0:00<br>–0:25</div>
+    <div><div class="title">오프닝 — 질문을 던진다</div>
+      <span class="cue">화면: 대시보드 첫 화면</span>
+      <div class="say">"자전거 용품 회사 <b>AdventureWorks</b>. 3년, <b>12만 건</b>의 거래가 있습니다.
+      질문은 두 개였습니다 — <b>'무엇이 팔리는가'</b>, 그리고 <b>'누가 살 것인가'</b>.
+      데이터로 답하고, 그 답을 <b>직접 써볼 수 있는 서비스</b>로 만들었습니다."</div></div>
+  </div>
+
+  <div class="beat">
+    <div class="t">0:25<br>–0:50</div>
+    <div><div class="title">데이터를 신뢰할 수 있게</div>
+      <span class="cue">화면: 그대로</span>
+      <div class="say">"7개 시트를 합쳐 12만 건을 만들고 <b>결측·중복·이상치를 제거</b>했습니다.
+      이상치는 자전거와 액세서리의 가격대가 100배 차이 나서, 전체가 아니라 <b>카테고리별로</b> 걸렀습니다 —
+      '비싼 정상 자전거'를 실수로 버리지 않으려고요. 분석 신뢰의 첫 단추였습니다."</div></div>
+  </div>
+
+  <div class="beat">
+    <div class="t">0:50<br>–1:25</div>
+    <div><div class="title">1막 "무엇이 팔리나" — 데이터가 스스로 말한다</div>
+      <span class="cue">화면: 아래로 스크롤 — 자동 인사이트 + 차트</span>
+      <div class="say">"흥미로운 건, 저희가 해석한 게 아니라 <b>데이터가 스스로 찾아낸 사실</b>이라는 점입니다.
+      매출 1년 새 <b>+47% 성장</b>, <b>자전거 한 카테고리가 매출의 87%</b>.
+      그리고 결정적으로 — <b>고객의 13%, 2,445명이 매출의 68%</b>를 만듭니다.
+      교과서 속 <b>파레토 법칙</b>이 그대로 보입니다. '누구에게 집중할지'가 분명해지죠."</div></div>
+  </div>
+
+  <div class="beat crm">
+    <div class="t">1:25<br>–2:15</div>
+    <div><div class="title">2막 "누가 살 것인가" — CRM 예측 ★핵심</div>
+      <span class="cue">화면: /playground → 🛒 구매 예측</span>
+      <div class="say">"새 고객이 자전거를 살까요? 여기 함정이 있습니다.
+      거래 데이터엔 <b>'안 샀다'는 기록이 없습니다.</b> 산 기록만 있죠.
+      그래서 <b>고객×상품 조합에서 사지 않은 경우를 0으로 만드는 negative sampling</b>으로
+      '살까 안 살까' 문제 자체를 <b>창조</b>했습니다. RandomForest 학습 결과 <b>정확도 93%, ROC-AUC 0.99</b>.
+      <br><br><i>(시연)</i> 활발한 리셀러는 자전거를 <b>'산다 100%'</b>, 신규 인터넷 고객은 <b>'안 산다 0.1%'</b> —
+      직관과 정확히 맞습니다. 이게 CRM의 <b>'어떤 고객이 어떤 물건을 사는가'</b> 입니다."</div></div>
+  </div>
+
+  <div class="beat">
+    <div class="t">2:15<br>–2:35</div>
+    <div><div class="title">3막 "얼마나 팔릴까" — 매출 회귀</div>
+      <span class="cue">화면: 💰 매출 예측 탭</span>
+      <div class="say">"상품과 지역을 넣으면 <b>매출도 예측</b>합니다. 역시 RandomForest, <b>R² 0.99</b>.
+      신상품을 어느 지역에 얼마나 풀지, 숫자로 답합니다."</div></div>
+  </div>
+
+  <div class="beat">
+    <div class="t">2:35<br>–2:50</div>
+    <div><div class="title">마무리 — So What (분석이 행동이 된다)</div>
+      <span class="cue">화면: 대시보드 복귀</span>
+      <div class="say">"정리하면 — 이탈 위험 고객엔 <b>리텐션</b>, 구매 성향 높은 고객엔 <b>타겟 마케팅</b>.
+      저희 결과물은 보고서가 아니라, 분석·예측·실행을 <b>한 화면에서 쓰는 서비스</b>입니다.
+      <b>분석이 곧 행동이 되는 것</b> — 그게 CRM의 목표이자 저희의 답입니다. 감사합니다."</div></div>
+  </div>
+
+  <h2>창의성 강조 포인트 (40점)</h2>
+  <div class="card"><ul>
+    <li><b>문제를 '창조'했다</b> — 구매 기록만 있는 데이터에서 negative sampling으로 Buy/Not 분류를 정의(최강 차별점).</li>
+    <li><b>분석 → 제품화</b> — 같은 모델을 대시보드·플레이그라운드·REST API 세 표면으로 제공.</li>
+    <li><b>데이터가 말하는 자동 인사이트</b> — 성장률·집중도·핵심고객을 코드가 문장으로 생성.</li>
+    <li><b>신뢰의 디테일</b> — 카테고리별 이상치 제거, 시계열 backtest, 미지 입력 차단.</li>
+  </ul></div>
+
+  <h2>예상 질문 & 답변</h2>
+  <div class="card qa"><ul>
+    <li><b>자전거 87% 편중?</b> → 그래서 매출은 자전거, <b>고객관리는 Champions</b>에 집중하라는 결론.</li>
+    <li><b>구매예측 정확도가 너무 높다(과적합)?</b> → 과거 활동 피처가 강한 신호. train/test 분리 + ROC-AUC로 평가, 신규 고객엔 실제로 낮은 확률(0.1%).</li>
+    <li><b>이상치를 왜 카테고리별로?</b> → 자전거($2천~)와 액세서리($5~)를 한 잣대로 자르면 정상 자전거가 이상치가 됨.</li>
+    <li><b>시계열 정확도?</b> → 마지막 6개월 숨기고 맞춘 <b>backtest MAPE 19%</b>.</li>
+    <li><b>모델은?</b> → 과제 요구대로 <b>RandomForest</b> 분류·회귀, 시계열만 Holt-Winters.</li>
+  </ul></div>
+
+  <h2>2인 발표 역할 분담 <span style="font-weight:500;font-size:.9rem;color:var(--ink3)">(교수가 둘 다에게 질문 → 둘 다 전체 숙지)</span></h2>
+  <table>
+    <tr><th>구간</th><th>발표자 A</th><th>발표자 B</th></tr>
+    <tr><td>오프닝·데이터·EDA (0:00–1:25)</td><td><b>A 진행</b></td><td>화면 조작</td></tr>
+    <tr><td>예측·마무리 (1:25–2:50)</td><td>화면 조작</td><td><b>B 진행</b></td></tr>
+  </table>
+  <div class="card">둘 다 반드시 아는 3가지: ① negative sampling으로 Buy/Not을 만든 이유 ② 파레토(13%→68%) ③ 카테고리별 이상치 제거.</div>
+
+  <div class="footnote" style="text-align:center;margin-top:24px">
+    이 페이지에서 <b>Ctrl/⌘ + P → PDF로 저장</b> 하면 발표용 PDF가 됩니다.
+  </div>
+
+</div>
+</body>
+</html>

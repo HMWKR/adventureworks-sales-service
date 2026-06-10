@@ -21,8 +21,9 @@ SQLITE_PATH = DATA_DIR / "adventure_sales.db"
 PROCESSED_CSV = DATA_DIR / "processed_sales.csv"   # 전처리 결과 (오프라인 실행용, 커밋 대상)
 
 # 모델 산출물
-REG_MODEL = MODEL_DIR / "sales_regressor.pkl"          # 매출 회귀
-CLF_MODEL = MODEL_DIR / "segment_classifier.pkl"       # 고객 RFM 세그먼트 분류
+REG_MODEL = MODEL_DIR / "sales_regressor.pkl"          # 매출 회귀 (RandomForestRegressor)
+BUY_MODEL = MODEL_DIR / "buy_classifier.pkl"           # 구매 예측 Buy/Not (RandomForestClassifier)
+CLF_MODEL = MODEL_DIR / "segment_classifier.pkl"       # 고객 RFM 세그먼트 분류 (보너스)
 TS_MODEL = MODEL_DIR / "monthly_forecaster.pkl"        # 월 매출 시계열
 METRICS_JSON = MODEL_DIR / "metrics.json"              # 학습 지표 (커밋 대상)
 
@@ -49,6 +50,14 @@ RANDOM_STATE = 42
 REG_NUM_FEATURES = ["Order Quantity", "List Price", "Standard Cost"]
 REG_CAT_FEATURES = ["Category", "Subcategory", "Channel", "Region"]
 REG_TARGET = "Sales Amount"
+
+# 구매 예측(Buy or Not) 입력 피처 — 고객×상품 카테고리 성향
+# (CRM 관점: 어떤 고객이 어떤 물건을 구매하는지 예측)
+BUY_NUM_FEATURES = ["prior_orders", "prior_monetary"]   # 고객의 과거 구매 횟수·금액
+BUY_CAT_FEATURES = ["Region", "Channel", "Category"]    # 지역·채널 + 대상 상품 카테고리
+
+# 이상치 제거 IQR 배수 (Sales Amount / Order Quantity)
+OUTLIER_IQR_MULT = 3.0
 
 # RFM 세그먼트 정의 (R/F/M 5분위 점수 기반)
 RFM_SEGMENTS = [

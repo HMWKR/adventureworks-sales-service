@@ -1,9 +1,10 @@
 # train.py — ML 모델 학습 (CRISP-DM 4단계: 모델링)
 # ------------------------------------------------------------
-# 3개 모델을 학습·저장한다.
-#   1) 매출 회귀     : Sales Amount 예측 (RandomForestRegressor)
-#   2) 고객 분류     : RFM 세그먼트 분류 (RandomForestClassifier)
-#   3) 월매출 시계열 : Holt-Winters 지수평활 (statsmodels)
+# 4개 모델을 학습·저장한다.
+#   1) 매출 회귀     : Sales Amount 예측 (RandomForestRegressor)   [과제 5-2]
+#   2) 구매 예측     : Buy or Not Buy 분류 (RandomForestClassifier) [과제 5-1, CRM]
+#   3) 고객 분류     : RFM 세그먼트 분류 (RandomForestClassifier)   [보너스]
+#   4) 월매출 시계열 : Holt-Winters 지수평활 (statsmodels)          [보너스]
 # 산출물: models/*.pkl + models/metrics.json
 # ------------------------------------------------------------
 import json
@@ -16,7 +17,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.metrics import (
     mean_absolute_error, mean_squared_error, r2_score,
-    accuracy_score, f1_score, classification_report,
+    accuracy_score, f1_score, classification_report, roc_auc_score,
 )
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -70,7 +71,74 @@ def train_sales_regressor(df: pd.DataFrame) -> dict:
     return metrics
 
 
-# ── 2. 고객 RFM 세그먼트 분류 ────────────────────────────────
+# ── 2. 구매 예측 (Buy or Not Buy) — 고객×상품 카테고리 성향 [과제 5-1] ──
+def train_buy_classifier(df: pd.DataFrame) -> dict:
+    """CRM 핵심: 어떤 고객이 어떤 상품(카테고리)을 구매하는지 Buy/Not 분류.
+
+    거래 데이터는 구매(positive)만 있으므로, 구매자×카테고리 전체 격자를 만들고
+    실제 구매한 조합을 1, 나머지를 0(negative sampling)으로 라벨링한다.
+    피처: 고객의 과거 구매횟수·금액 + 지역·채널 + 대상 카테고리.
+    """
+    def _mode(s):
+        s = s.dropna()
+        return s.mode().iloc[0] if not s.empty else "Unknown"
+
+    # 구매자 단위 집계(과거 행동 + 지역·채널)
+    buyer = df.groupby("Buyer").agg(
+        Region=("Region", _mode),
+        Channel=("Channel", "first"),
+        prior_orders=("Sales Order", "nunique"),
+        prior_monetary=("Sales Amount", "sum"),
+    ).reset_index()
+
+    cats = sorted(df["Category"].dropna().unique().tolist())
+    bought = set(map(tuple, df[["Buyer", "Category"]].dropna().drop_duplicates().values))
+
+    # 구매자 × 카테고리 격자 → 라벨(실구매=1, 미구매=0)
+    grid = buyer.loc[buyer.index.repeat(len(cats))].reset_index(drop=True)
+    grid["Category"] = cats * len(buyer)
+    grid["label"] = [int((b, c) in bought) for b, c in zip(grid["Buyer"], grid["Category"])]
+
+    feats = config.BUY_NUM_FEATURES + config.BUY_CAT_FEATURES
+    X, y = grid[feats], grid["label"]
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        X, y, test_size=0.2, random_state=config.RANDOM_STATE, stratify=y)
+
+    pre = ColumnTransformer([
+        ("num", "passthrough", config.BUY_NUM_FEATURES),
+        ("cat", OneHotEncoder(handle_unknown="ignore"), config.BUY_CAT_FEATURES),
+    ])
+    model = Pipeline([
+        ("pre", pre),
+        ("rf", RandomForestClassifier(
+            n_estimators=120, max_depth=16, n_jobs=-1,
+            random_state=config.RANDOM_STATE, class_weight="balanced")),
+    ])
+    model.fit(X_tr, y_tr)
+    pred = model.predict(X_te)
+    proba = model.predict_proba(X_te)[:, 1]
+
+    cat_values = {c: sorted(map(str, grid[c].dropna().unique().tolist()))
+                  for c in config.BUY_CAT_FEATURES}
+    with open(config.BUY_MODEL, "wb") as f:
+        pickle.dump({"model": model, "features": feats,
+                     "num": config.BUY_NUM_FEATURES, "cat": config.BUY_CAT_FEATURES,
+                     "cat_values": cat_values, "categories": cats}, f)
+
+    metrics = {
+        "n_train": int(len(X_tr)), "n_test": int(len(X_te)),
+        "positives": int(y.sum()), "negatives": int((y == 0).sum()),
+        "accuracy": round(float(accuracy_score(y_te, pred)), 4),
+        "f1": round(float(f1_score(y_te, pred)), 4),
+        "roc_auc": round(float(roc_auc_score(y_te, proba)), 4),
+        "features": feats,
+    }
+    print(f"  [구매예측] accuracy={metrics['accuracy']}  F1={metrics['f1']}  "
+          f"ROC-AUC={metrics['roc_auc']}  (pos {metrics['positives']:,}/neg {metrics['negatives']:,})")
+    return metrics
+
+
+# ── 3. 고객 RFM 세그먼트 분류 (보너스) ───────────────────────
 def train_segment_classifier() -> dict:
     rfm = rfm_service.compute_rfm()
     X = rfm[["Recency", "Frequency", "Monetary"]]
@@ -177,6 +245,7 @@ def train_all() -> dict:
         "trained_at": dt.datetime.now().isoformat(timespec="seconds"),
         "dataset_rows": int(len(df)),
         "regression": train_sales_regressor(df),
+        "buy_classification": train_buy_classifier(df),
         "classification": train_segment_classifier(),
         "timeseries": train_monthly_forecaster(df),
     }

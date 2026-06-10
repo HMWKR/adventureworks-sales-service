@@ -21,9 +21,9 @@ class InvalidInput(ValueError):
 
 
 def _ensure_models() -> None:
-    """모델 3종이 모두 없으면 학습을 1회 실행한다."""
-    if not (config.REG_MODEL.exists() and config.CLF_MODEL.exists()
-            and config.TS_MODEL.exists()):
+    """모델 4종이 모두 없으면 학습을 1회 실행한다."""
+    if not (config.REG_MODEL.exists() and config.BUY_MODEL.exists()
+            and config.CLF_MODEL.exists() and config.TS_MODEL.exists()):
         from app.ml import train
         train.train_all()
 
@@ -44,6 +44,7 @@ def _load() -> dict:
     _ensure_models()
     return {
         "reg": _safe_pickle_load(config.REG_MODEL),
+        "buy": _safe_pickle_load(config.BUY_MODEL),
         "clf": _safe_pickle_load(config.CLF_MODEL),
         "ts": _safe_pickle_load(config.TS_MODEL),
     }
@@ -84,7 +85,39 @@ def predict_sales(order_quantity: int, list_price: float, standard_cost: float,
     return {"predicted_sales_amount": round(pred, 2)}
 
 
-# ── 2. 고객 RFM 세그먼트 분류 예측 ───────────────────────────
+# ── 2. 구매 예측 (Buy or Not Buy) ────────────────────────────
+def predict_buy(region: str, channel: str, category: str,
+                prior_orders: int = 0, prior_monetary: float = 0.0) -> dict:
+    """고객정보(지역·채널·과거 구매)와 대상 상품 카테고리로 구매 여부 예측."""
+    bundle = _load()["buy"]
+    model = bundle["model"]
+    feats = bundle["features"]
+    cat_values = bundle.get("cat_values", {})
+
+    row_dict = {
+        "prior_orders": prior_orders,
+        "prior_monetary": prior_monetary,
+        "Region": region,
+        "Channel": channel,
+        "Category": category,
+    }
+    for col in ("Region", "Channel", "Category"):
+        allowed = cat_values.get(col)
+        if allowed and str(row_dict[col]) not in allowed:
+            preview = ", ".join(allowed[:8]) + ("..." if len(allowed) > 8 else "")
+            raise InvalidInput(f"알 수 없는 {col} 값: '{row_dict[col]}' (허용: {preview})")
+
+    row = pd.DataFrame([{k: row_dict[k] for k in feats}])
+    proba = float(model.predict_proba(row)[0][1])   # P(구매=1)
+    will_buy = proba >= 0.5
+    return {
+        "will_buy": will_buy,
+        "label": "구매(Buy)" if will_buy else "비구매(Not Buy)",
+        "buy_probability": round(proba, 4),
+    }
+
+
+# ── 3. 고객 RFM 세그먼트 분류 예측 (보너스) ──────────────────
 def classify_segment(recency: int, frequency: int, monetary: float) -> dict:
     bundle = _load()["clf"]
     model = bundle["model"]

@@ -70,6 +70,21 @@ class SegmentPredictResponse(BaseModel):
     probabilities: dict[str, float]
 
 
+# ── 구매 예측 (Buy or Not Buy) ───────────────────────────────
+class BuyPredictRequest(BaseModel):
+    region: str = Field(..., examples=["Southwest"])
+    channel: str = Field(..., examples=["Reseller"])
+    category: str = Field(..., examples=["Bikes"])
+    prior_orders: int = Field(0, ge=0, examples=[3], description="고객의 과거 구매 횟수")
+    prior_monetary: float = Field(0.0, ge=0, examples=[20000.0], description="고객의 과거 총 구매액")
+
+
+class BuyPredictResponse(BaseModel):
+    will_buy: bool
+    label: str
+    buy_probability: float
+
+
 class ForecastPoint(BaseModel):
     month: str
     forecast_sales_amount: float

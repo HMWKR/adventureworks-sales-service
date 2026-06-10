@@ -125,10 +125,39 @@ def preprocess(m: pd.DataFrame) -> pd.DataFrame:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    # 핵심 지표·그룹화 키 결측 행 제거 (Buyer 포함 — RFM groupby 무결성)
-    df = df.dropna(
-        subset=["Sales Amount", "Order Quantity", "Date", "Buyer"]
-    ).reset_index(drop=True)
+    n0 = len(df)
+    # (1) 결측 제거 — 핵심 지표·그룹화 키(Buyer 포함, RFM groupby 무결성)
+    df = df.dropna(subset=["Sales Amount", "Order Quantity", "Date", "Buyer"])
+    n_missing = n0 - len(df)
+
+    # (2) 중복 제거 — 완전 동일 행
+    before = len(df)
+    df = df.drop_duplicates()
+    n_dup = before - len(df)
+
+    # (3) 이상치 제거
+    #   3a. 비정상 값: 매출/수량이 0 이하인 행
+    before = len(df)
+    df = df[(df["Sales Amount"] > 0) & (df["Order Quantity"] > 0)]
+    n_nonpos = before - len(df)
+    #   3b. 극단 이상치: 카테고리별 Sales Amount IQR 경계 밖
+    #       (우편향 분포에서 전역 IQR은 고가 정상상품(자전거)을 오인 제거하므로
+    #        카테고리별로 IQR을 적용해 스케일 차이를 보정한다)
+    before = len(df)
+    k = config.OUTLIER_IQR_MULT
+    keep = pd.Series(True, index=df.index)
+    for _, g in df.groupby("Category"):
+        q1, q3 = g["Sales Amount"].quantile(0.25), g["Sales Amount"].quantile(0.75)
+        iqr = q3 - q1
+        lo, hi = q1 - k * iqr, q3 + k * iqr
+        bad = g.index[(g["Sales Amount"] < lo) | (g["Sales Amount"] > hi)]
+        keep.loc[bad] = False
+    df = df[keep]
+    n_outlier = before - len(df)
+
+    df = df.reset_index(drop=True)
+    print(f"   정제: 결측 {n_missing:,} · 중복 {n_dup:,} · 비정상 {n_nonpos:,} · "
+          f"이상치 {n_outlier:,} 제거 → {len(df):,}행 (원본 {n0:,})")
     return df
 
 

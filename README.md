@@ -6,6 +6,8 @@ Microsoft **AdventureWorks(자전거 용품 도소매)** 매출 데이터를 **�
 
 `week13 FastAPI-MVC.pptx` 기말과제(CRISP-DM 적용)를 실제 동작하는 서비스로 구현했습니다.
 
+> 🎤 **발표 자료**: [`presentation/발표대본.md`](presentation/발표대본.md) · [`presentation/발표대본.html`](presentation/발표대본.html) (브라우저에서 열어 Ctrl+P → PDF) — 채점 기준(스토리텔링·창의성·전달력)에 맞춘 ≤3분 대본.
+
 ---
 
 ## 📑 목차
@@ -28,9 +30,9 @@ Microsoft **AdventureWorks(자전거 용품 도소매)** 매출 데이터를 **�
 | 항목 | 내용 |
 |---|---|
 | **무엇** | 매출 데이터 분석 대시보드 + 3가지 머신러닝 예측(매출·고객·미래) 웹 서비스 |
-| **데이터** | MS Power BI `AdventureWorks Sales.xlsx` (7시트) → 정제 **121,253행 / 36개월** |
+| **데이터** | MS Power BI `AdventureWorks Sales.xlsx` (7시트) → **결측·중복·이상치 제거** → 정제 **117,166행 / 36개월** (원본 121,253) |
 | **분석** | EDA(월·지역·카테고리·채널) + RFM 고객 세그먼트(7종) + 자동 인사이트(5종) |
-| **예측** | ① 매출 회귀(R² 0.98) ② 고객 세그먼트 분류(정확도 0.76) ③ 월매출 시계열(backtest MAPE 21.5%) |
+| **예측** | ① **구매 예측 Buy/Not**(RF 분류, CRM, ROC-AUC 0.99) ② **매출 회귀**(RF, R² 0.99) ③ 고객 세그먼트 분류(RF) ④ 월매출 시계열(Holt-Winters) |
 | **화면** | 스토리 대시보드(`/`) · 예측 플레이그라운드(`/playground`) · Gradio(`/gradio`) · Swagger(`/docs`) |
 | **기술** | FastAPI · pandas · scikit-learn · statsmodels · Jinja2 · ECharts · Gradio |
 | **설계** | MVC 레이어드 아키텍처 + Toss 스타일 디자인 시스템 |
@@ -176,9 +178,12 @@ uvicorn app.main:app --reload
 
 | 모델 | 알고리즘 | 입력 → 출력 | 성능 |
 |---|---|---|---|
-| **매출 회귀** | `RandomForestRegressor`(n=80, depth=18) | 수량·정가·원가 + 카테고리·서브카테고리·채널·지역(OneHot) → 매출액 | **R²=0.9811**, MAE=21.83, RMSE=234.28 (train 97,002 / test 24,251) |
-| **고객 분류** | `RandomForestClassifier`(n=100, depth=12, balanced) | R·F·M → 7개 세그먼트 | **정확도=0.7623**, macro-F1=0.7439 (train 15,226 / test 3,807) |
-| **월매출 시계열** | Holt-Winters(가법추세 damped + 가법계절 12) | 36개월 → 향후 N개월 | in-MAPE 27.52%, **backtest-MAPE 21.5%** (마지막 6개월 holdout) |
+| **구매 예측 Buy/Not** [과제 5-1] | `RandomForestClassifier`(n=120, depth=16, balanced) | 지역·채널·과거구매(횟수·금액) + 카테고리 → 구매 여부(1/0) | **정확도=0.93**, F1=0.92, **ROC-AUC=0.99** (pos 32,977 / neg 43,151) |
+| **매출 회귀** [과제 5-2] | `RandomForestRegressor`(n=80, depth=18) | 수량·정가·원가 + 카테고리·서브카테고리·채널·지역(OneHot) → 매출액 | **R²=0.99**, MAE=16.26, RMSE=145.79 |
+| **고객 세그먼트 분류** (보너스) | `RandomForestClassifier`(n=100, depth=12, balanced) | R·F·M → 7개 세그먼트 | 정확도=0.76, macro-F1=0.74 |
+| **월매출 시계열** (보너스) | Holt-Winters(가법추세 damped + 가법계절 12) | 36개월 → 향후 N개월 | in-MAPE 23.7%, **backtest-MAPE 19.4%** (마지막 6개월 holdout) |
+
+> **구매 예측(Buy or Not Buy)** — 거래 데이터는 '구매(positive)'만 있어 'Not Buy' 라벨이 없습니다. 그래서 **구매자×카테고리 격자에서 실제 구매하지 않은 조합을 0으로 라벨링(negative sampling)** 하여 분류 문제를 구성했습니다. CRM의 "어떤 고객이 어떤 물건을 구매하는지"를 직접 모델링합니다.
 
 > **분류 모델 클래스별 F1**: Champions 0.998(최고) … Lost 0.483(최저). 세그먼트 라벨은 RFM 5분위 규칙에서 파생되므로, 이 분류기는 그 규칙을 raw R/F/M로 빠르게 재현하는 **스코어러**입니다(전역 분위 재계산 없이 신규 고객 즉시 분류).
 >
@@ -213,6 +218,7 @@ uvicorn app.main:app --reload
 ### 예측 — `/api/predict`
 | Method | 경로 | 요청 → 응답 |
 |---|---|---|
+| POST | `/api/predict/buy` | `{region, channel, category, prior_orders, prior_monetary}` → `{will_buy, label, buy_probability}` · 미지 범주 시 **400** |
 | POST | `/api/predict/sales` | `{order_quantity(1~1000), list_price, standard_cost, category, subcategory, channel, region}` → `{predicted_sales_amount}` · 미지 범주 시 **400**, 검증 실패 시 **422** |
 | POST | `/api/predict/segment` | `{recency, frequency, monetary}` → `{segment, confidence, probabilities}` |
 | GET | `/api/predict/forecast?horizon=6` | (1~24) → `{horizon, history:[{month, sales_amount}], forecast:[{month, forecast_sales_amount}]}` |
@@ -227,6 +233,11 @@ uvicorn app.main:app --reload
 
 #### 요청 예시
 ```bash
+# 구매 예측 (Buy or Not Buy) — CRM
+curl -X POST http://127.0.0.1:8000/api/predict/buy \
+  -H "Content-Type: application/json" \
+  -d "{\"region\":\"Southwest\",\"channel\":\"Reseller\",\"category\":\"Bikes\",\"prior_orders\":8,\"prior_monetary\":200000}"
+
 curl -X POST http://127.0.0.1:8000/api/predict/sales \
   -H "Content-Type: application/json" \
   -d "{\"order_quantity\":3,\"list_price\":2000,\"standard_cost\":1200,\"category\":\"Bikes\",\"subcategory\":\"Road Bikes\",\"channel\":\"Reseller\",\"region\":\"Southwest\"}"

@@ -21,6 +21,10 @@
   fill($('s-sub'), CH.subcategories || [], 'Road Bikes');
   fill($('s-ch'), CH.channels || [], 'Reseller');
   fill($('s-region'), CH.regions || [], 'Southwest');
+  // 구매 예측 드롭다운
+  fill($('b-region'), CH.regions || [], 'Southwest');
+  fill($('b-ch'), CH.channels || [], 'Reseller');
+  fill($('b-cat'), CH.categories || [], 'Bikes');
 
   /* 세그먼트 컨트롤 */
   document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
@@ -54,7 +58,28 @@
     } catch (e) { errCard(out, e.message); }
   });
 
-  /* 2) 세그먼트 예측 */
+  /* 2) 구매 예측 (Buy or Not Buy) */
+  $('b-go').addEventListener('click', async () => {
+    const out = $('b-result'); spin(out);
+    try {
+      const d = await postJSON('/api/predict/buy', {
+        region: $('b-region').value, channel: $('b-ch').value, category: $('b-cat').value,
+        prior_orders: +$('b-orders').value, prior_monetary: +$('b-mon').value,
+      });
+      const pct = (d.buy_probability * 100).toFixed(1);
+      const color = d.will_buy ? '#1bbf83' : '#f04452';
+      out.className = 'result';
+      out.innerHTML = `<div class="r-label">🛒 구매 예측 결과</div>
+        <div><span class="r-badge" style="background:${color}">${d.label}</span></div>
+        <div class="r-sub">구매 확률 <b>${pct}%</b></div>
+        <div class="prob"><div class="prob-row">
+          <span class="name">구매 확률</span>
+          <span class="bar"><i style="width:${pct}%;background:${color}"></i></span>
+          <span class="pct">${pct}%</span></div></div>`;
+    } catch (e) { errCard(out, e.message); }
+  });
+
+  /* 3) 세그먼트 예측 */
   $('g-go').addEventListener('click', async () => {
     const out = $('g-result'); spin(out);
     try {

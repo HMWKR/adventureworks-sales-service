@@ -153,6 +153,22 @@ def _predict_sales(qty, list_price, std_cost, category, subcategory, channel, re
         return f"<div class='result-card'>❌ 예측 오류: {e}</div>"
 
 
+def _predict_buy(region, channel, category, orders, monetary):
+    try:
+        r = ml_service.predict_buy(region=region, channel=channel, category=category,
+                                   prior_orders=int(orders), prior_monetary=float(monetary))
+        color = "#1bbf83" if r["will_buy"] else "#f04452"
+        pct = r["buy_probability"] * 100
+        return (f"<div class='result-card'><div class='lbl'>🛒 구매 예측</div>"
+                f"<div style='margin:8px 0'><span class='seg-badge' style='background:{color}'>{r['label']}</span></div>"
+                f"<div class='lbl'>구매 확률 {pct:.1f}%</div></div>")
+    except ml_service.InvalidInput as e:
+        return f"<div class='result-card'>⚠️ 입력 오류: {e}</div>"
+    except Exception as e:
+        logger.exception("predict_buy 실패")
+        return f"<div class='result-card'>❌ 예측 오류: {e}</div>"
+
+
 def _predict_segment(recency, frequency, monetary):
     try:
         r = ml_service.classify_segment(int(recency), int(frequency), float(monetary))
@@ -281,6 +297,24 @@ def build_demo() -> gr.Blocks:
             btn.click(_predict_sales,
                       [qty, list_price, std_cost, category, subcategory, channel, region],
                       out)
+
+        # ── 구매 예측 (Buy or Not Buy) ──
+        with gr.Tab("🛒 구매 예측"):
+            gr.Markdown("고객정보와 상품 카테고리를 입력하면 **구매 여부(Buy/Not)**를 분류 모델(RandomForest)로 예측합니다.")
+            with gr.Row():
+                with gr.Column(scale=1):
+                    b_region = gr.Dropdown(regions, label="지역",
+                                           value="Southwest" if "Southwest" in regions else (regions[0] if regions else None))
+                    b_channel = gr.Dropdown(channels, label="채널",
+                                            value=channels[0] if channels else None)
+                    b_cat = gr.Dropdown(cats, label="관심 상품 카테고리",
+                                        value="Bikes" if "Bikes" in cats else (cats[0] if cats else None))
+                    b_orders = gr.Number(label="과거 구매 횟수", value=3, minimum=0)
+                    b_mon = gr.Number(label="과거 총 구매액 ($)", value=20000.0, minimum=0)
+                    buy_btn = gr.Button("구매 예측하기", variant="primary", size="lg")
+                with gr.Column(scale=1):
+                    buy_out = gr.HTML()
+            buy_btn.click(_predict_buy, [b_region, b_channel, b_cat, b_orders, b_mon], buy_out)
 
         # ── 세그먼트 예측 (분류) ──
         with gr.Tab("🎯 고객 세그먼트 예측"):

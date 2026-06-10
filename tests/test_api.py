@@ -159,6 +159,35 @@ def test_predict_segment_high_value(client):
     assert r["segment"] in ("Champions", "Loyal")
 
 
+# ── 예측: 구매 Buy or Not (과제 5-1, CRM) ────────────────────
+def test_predict_buy(client):
+    r = client.post("/api/predict/buy", json={
+        "region": "Southwest", "channel": "Reseller", "category": "Bikes",
+        "prior_orders": 8, "prior_monetary": 200000})
+    assert r.status_code == 200
+    body = r.json()
+    assert set(body) == {"will_buy", "label", "buy_probability"}
+    assert 0 <= body["buy_probability"] <= 1
+    assert isinstance(body["will_buy"], bool)
+
+
+def test_predict_buy_active_vs_inactive(client):
+    # 활성 고객(구매 多)은 비활성 고객보다 구매 확률이 높아야 함
+    active = client.post("/api/predict/buy", json={
+        "region": "Southwest", "channel": "Reseller", "category": "Bikes",
+        "prior_orders": 10, "prior_monetary": 300000}).json()
+    inactive = client.post("/api/predict/buy", json={
+        "region": "Australia", "channel": "Internet", "category": "Bikes",
+        "prior_orders": 1, "prior_monetary": 50}).json()
+    assert active["buy_probability"] > inactive["buy_probability"]
+
+
+def test_predict_buy_unknown_region(client):
+    r = client.post("/api/predict/buy", json={
+        "region": "행성X", "channel": "Reseller", "category": "Bikes"})
+    assert r.status_code == 400
+
+
 # ── 예측: 시계열 ─────────────────────────────────────────────
 def test_forecast(client):
     r = client.get("/api/predict/forecast?horizon=6")

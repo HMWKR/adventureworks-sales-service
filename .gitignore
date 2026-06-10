@@ -27,3 +27,6 @@ server.log
 Thumbs.db
 gradio_cached_examples/
 .gradio/
+
+# OMC plugin state
+.omc/

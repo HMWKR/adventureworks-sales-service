@@ -20,15 +20,16 @@
   </div></nav>
 
   <header class="hero" style="padding:60px 0 30px"><div class="wrap">
-    <span class="badge">PLAYGROUND · 머신러닝 3종</span>
+    <span class="badge">PLAYGROUND · 머신러닝 4종</span>
     <h1 style="font-size:2.2rem">직접 <span class="accent">예측</span>해 보세요.</h1>
-    <p>조건을 입력하면 학습된 모델이 즉시 결과를 알려드려요. 매출·고객 세그먼트·미래 매출 세 가지를 예측할 수 있어요.</p>
+    <p>조건을 입력하면 학습된 모델이 즉시 결과를 알려드려요. 매출·구매여부·고객 세그먼트·미래 매출 네 가지를 예측할 수 있어요.</p>
   </div></header>
 
   <section style="padding-top:8px"><div class="wrap">
     <!-- 세그먼트 컨트롤 -->
     <div class="seg" role="tablist">
       <button class="active" data-tool="sales">💰 매출 예측</button>
+      <button data-tool="buy">🛒 구매 예측</button>
       <button data-tool="segment">🎯 고객 세그먼트</button>
       <button data-tool="forecast">📈 시계열 예측</button>
     </div>
@@ -59,7 +60,29 @@
       </div>
     </div>
 
-    <!-- 2) 고객 세그먼트 -->
+    <!-- 2) 구매 예측 (Buy or Not Buy) -->
+    <div class="tool" id="tool-buy">
+      <div class="tool-grid">
+        <div class="card">
+          <h3>고객 · 상품 정보 입력</h3><div class="hint">RandomForest 분류기가 이 고객이 해당 상품을 <b>살지(Buy)/안 살지(Not)</b> 예측해요. (CRM)</div>
+          <div class="field-row">
+            <div class="field"><label>지역</label><select id="b-region"></select></div>
+            <div class="field"><label>채널</label><select id="b-ch"></select></div>
+          </div>
+          <div class="field"><label>관심 상품 카테고리</label><select id="b-cat"></select></div>
+          <div class="field-row">
+            <div class="field"><label>과거 구매 횟수</label><input type="number" id="b-orders" value="3" min="0"></div>
+            <div class="field"><label>과거 총 구매액 ($)</label><input type="number" id="b-mon" value="20000" min="0"></div>
+          </div>
+          <button class="btn btn-primary btn-block" id="b-go">구매 예측하기</button>
+        </div>
+        <div class="result" id="b-result">
+          <div class="placeholder">고객·상품 정보를 넣고<br><b>구매 예측하기</b>를 눌러보세요 🛒</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3) 고객 세그먼트 -->
     <div class="tool" id="tool-segment">
       <div class="tool-grid">
         <div class="card">

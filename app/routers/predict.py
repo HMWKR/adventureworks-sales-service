@@ -20,9 +20,21 @@ def predict_sales(req: schemas.SalesPredictRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.post("/buy", response_model=schemas.BuyPredictResponse)
+def predict_buy(req: schemas.BuyPredictRequest):
+    """구매 예측 Buy or Not Buy (PPT 요구: 고객정보 → 구매 여부, CRM)."""
+    try:
+        return ml_service.predict_buy(
+            region=req.region, channel=req.channel, category=req.category,
+            prior_orders=req.prior_orders, prior_monetary=req.prior_monetary,
+        )
+    except ml_service.InvalidInput as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @router.post("/segment", response_model=schemas.SegmentPredictResponse)
 def predict_segment(req: schemas.SegmentPredictRequest):
-    """고객 RFM 세그먼트 분류 예측."""
+    """고객 RFM 세그먼트 분류 예측 (보너스)."""
     return ml_service.classify_segment(req.recency, req.frequency, req.monetary)
 
 
