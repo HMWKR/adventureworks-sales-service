@@ -71,12 +71,20 @@
         box.innerHTML = '<div class="placeholder" style="padding:14px">아직 기록이 없어요. 위에서 예측을 한 번 해보세요.</div>';
         return;
       }
-      box.innerHTML = d.items.map(it => {
-        const t = (it.created_at || '').replace('T', ' ').slice(0, 16);
-        const k = KIND_KO[it.kind] || it.kind;
-        return `<div class="recent-row"><span class="kind ${it.kind}">${k}</span>`
-             + `<span class="desc">${summarize(it)}</span><span class="time">${t}</span></div>`;
-      }).join('');
+      // 저장형 XSS 방지: innerHTML 문자열 조립 대신 DOM 생성 + textContent
+      const KNOWN = { buy: 1, sales: 1, segment: 1 };
+      box.replaceChildren(...d.items.map(it => {
+        const row = document.createElement('div'); row.className = 'recent-row';
+        const kind = document.createElement('span');
+        kind.className = 'kind ' + (KNOWN[it.kind] ? it.kind : '');   // 알려진 kind만 클래스
+        kind.textContent = KIND_KO[it.kind] || String(it.kind || '');
+        const desc = document.createElement('span'); desc.className = 'desc';
+        desc.textContent = summarize(it);
+        const time = document.createElement('span'); time.className = 'time';
+        time.textContent = (it.created_at || '').replace('T', ' ').slice(0, 16);
+        row.append(kind, desc, time);
+        return row;
+      }));
     } catch (e) { /* 조용히 무시 */ }
   }
   loadRecent();
