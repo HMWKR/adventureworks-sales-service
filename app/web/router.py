@@ -22,8 +22,7 @@ router = APIRouter(tags=["Dashboard"])
 @router.get("/", response_class=HTMLResponse)
 def dashboard(request: Request):
     payload = insight_service.build_dashboard_payload()
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "dashboard.html", {
         "data_json": json.dumps(payload, ensure_ascii=False),
         "s": payload["summary"],
         "sh": payload["summary_human"],
@@ -42,8 +41,7 @@ def playground(request: Request):
         "channels": sorted(df["Channel"].dropna().unique().tolist()),
         "regions": sorted(df["Region"].dropna().unique().tolist()),
     }
-    return templates.TemplateResponse("playground.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "playground.html", {
         "choices_json": json.dumps(choices, ensure_ascii=False),
         "glossary_json": json.dumps(i18n.get_glossary(), ensure_ascii=False),
     })
