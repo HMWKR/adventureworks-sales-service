@@ -53,7 +53,7 @@
   <div class="hero">
     <h1>🚲 기말과제 발표 대본</h1>
     <div class="sub">AdventureWorks 매출 분석·예측 서비스 — "무엇이 팔리나, 누가 살 것인가" (CRM)</div>
-    <span class="time">⏱ 목표 2분 50초 · 5분 한도 내</span>
+    <span class="time">⏱ 목표 2분 55초 · 5분 한도 내</span>
   </div>
 
   <h2>한 장 요약 — 채점 전략</h2>
@@ -67,6 +67,7 @@
     <span class="chip">거래 12만 건</span><span class="chip">36개월</span><span class="chip">매출 $93.5M</span>
     <span class="chip">자전거 = 매출 87%</span><span class="chip">고객 13% → 매출 68%</span>
     <span class="chip">구매예측 ROC-AUC 0.99</span><span class="chip">매출회귀 R² 0.99</span>
+    <span class="chip">🌐 HF Spaces 라이브 배포</span><span class="chip">예측로그 → Supabase</span>
   </div>
 
   <h2>화면 큐 시트</h2>
@@ -76,7 +77,8 @@
     <tr><td>예측</td><td>플레이그라운드 → 🛒 구매 → 💰 매출</td><td><code>/playground</code></td></tr>
     <tr><td>마무리</td><td>대시보드 복귀</td><td><code>/</code></td></tr>
   </table>
-  <div class="footnote">발표 전 <code>uvicorn app.main:app --reload</code> 실행 + 두 탭 미리 열어두기.</div>
+  <div class="footnote">발표 전 <code>uvicorn app.main:app --reload</code> 실행 + 두 탭 미리 열어두기.<br>
+  🌐 데모는 안정성을 위해 <b>로컬</b> 권장이나, 실제로 <b>라이브 배포</b>됨 — <code>https://leesungmin-adventureworks-sales-service.hf.space</code> (네트워크 안정 시 라이브 시연 가능).</div>
 
   <h2>발표 대본</h2>
 
@@ -129,11 +131,12 @@
   </div>
 
   <div class="beat">
-    <div class="t">2:35<br>–2:50</div>
+    <div class="t">2:35<br>–2:55</div>
     <div><div class="title">마무리 — So What (분석이 행동이 된다)</div>
       <span class="cue">화면: 대시보드 복귀</span>
       <div class="say">"정리하면 — 이탈 위험 고객엔 <b>리텐션</b>, 구매 성향 높은 고객엔 <b>타겟 마케팅</b>.
       저희 결과물은 보고서가 아니라, 분석·예측·실행을 <b>한 화면에서 쓰는 서비스</b>입니다.
+      그리고 이건 발표용 데모가 아니라 — <b>지금 인터넷에 배포돼 누구나 접속할 수 있는</b> 서비스입니다.
       <b>분석이 곧 행동이 되는 것</b> — 그게 CRM의 목표이자 저희의 답입니다. 감사합니다."</div></div>
   </div>
 
@@ -143,6 +146,8 @@
     <li><b>분석 → 제품화</b> — 같은 모델을 대시보드·플레이그라운드·REST API 세 표면으로 제공.</li>
     <li><b>데이터가 말하는 자동 인사이트</b> — 성장률·집중도·핵심고객을 코드가 문장으로 생성.</li>
     <li><b>신뢰의 디테일</b> — 카테고리별 이상치 제거, 시계열 backtest, 미지 입력 차단.</li>
+    <li><b>로컬을 넘어 실제 배포</b> — Docker로 <b>Hugging Face Spaces 라이브 배포</b>(빌드 시 데이터·모델 자동 생성). 제출물이 아니라 상시 접속 가능한 제품.</li>
+    <li><b>예측 로그 파이프라인</b> — 모든 예측을 <b>Supabase(클라우드 DB)</b>에 기록, 미설정 시 로컬 SQLite 폴백.</li>
   </ul></div>
 
   <h2>예상 질문 & 답변</h2>
@@ -152,6 +157,7 @@
     <li><b>이상치를 왜 카테고리별로?</b> → 자전거($2천~)와 액세서리($5~)를 한 잣대로 자르면 정상 자전거가 이상치가 됨.</li>
     <li><b>시계열 정확도?</b> → 마지막 6개월 숨기고 맞춘 <b>backtest MAPE 19%</b>.</li>
     <li><b>모델은?</b> → 과제 요구대로 <b>RandomForest</b> 분류·회귀, 시계열만 Holt-Winters.</li>
+    <li><b>실제 배포했나?</b> → 네, <b>Docker로 Hugging Face Spaces 배포</b>(공개 URL). 빌드 시 데이터·모델 자동 생성, 예측은 Supabase 기록.</li>
   </ul></div>
 
   <h2>2인 발표 역할 분담 <span style="font-weight:500;font-size:.9rem;color:var(--ink3)">(교수가 둘 다에게 질문 → 둘 다 전체 숙지)</span></h2>
