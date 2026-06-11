@@ -1,0 +1,15 @@
+# Render 배포 설정 (Docker) — https://render.com
+# Render 대시보드 → New → Blueprint → 이 저장소 선택하면 자동 인식.
+services:
+  - type: web
+    name: adventureworks-sales-service
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      # Supabase 예측 로그(선택). 미설정 시 로컬 SQLite 폴백.
+      - key: SUPABASE_URL
+        sync: false        # 대시보드에서 직접 입력(시크릿)
+      - key: SUPABASE_KEY
+        sync: false

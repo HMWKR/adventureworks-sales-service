@@ -30,3 +30,6 @@ gradio_cached_examples/
 
 # OMC plugin state
 .omc/
+
+# 환경변수(시크릿) — 커밋 금지
+.env

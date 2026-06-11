@@ -1,0 +1,15 @@
+# 빌드 컨텍스트 최소화 — 데이터/모델은 빌드 중 run_pipeline.py 가 재생성
+.git
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.omc
+.env
+server.log
+data/*.xlsx
+data/*.db
+data/*.csv
+models/*.pkl
+presentation

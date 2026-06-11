@@ -215,3 +215,18 @@ section { padding: 56px 0; }
 .spin { width: 26px; height: 26px; border: 3px solid var(--line); border-top-color: var(--blue);
   border-radius: 50%; animation: rot .7s linear infinite; margin: 0 auto; }
 @keyframes rot { to { transform: rotate(360deg); } }
+
+/* 최근 예측 기록 */
+.log-badge { font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+  vertical-align: middle; margin-left: 6px; }
+.log-badge.supabase { background: #e6f7ef; color: #128a5b; }
+.log-badge.local { background: var(--line); color: var(--ink-3); }
+.recent-list { margin-top: 12px; }
+.recent-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-bottom: 1px solid var(--line); font-size: .9rem; }
+.recent-row .kind { font-weight: 800; padding: 3px 10px; border-radius: 8px; font-size: .8rem; white-space: nowrap; }
+.recent-row .kind.buy { background: #e6f7ef; color: #128a5b; }
+.recent-row .kind.sales { background: var(--blue-50); color: var(--blue-dark); }
+.recent-row .kind.segment { background: #f3eefe; color: #6b3fd4; }
+.recent-row .desc { flex: 1; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recent-row .time { color: var(--ink-3); font-size: .8rem; white-space: nowrap; }

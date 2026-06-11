@@ -45,8 +45,41 @@
       body: JSON.stringify(body) });
     const data = await r.json();
     if (!r.ok) throw new Error(data.detail || ('HTTP ' + r.status));
+    setTimeout(loadRecent, 200);   // 예측 직후 기록 갱신(서버 로그 반영)
     return data;
   }
+
+  /* 최근 예측 기록 (Supabase/로컬) */
+  const KIND_KO = { buy: '구매예측', sales: '매출예측', segment: '세그먼트' };
+  function summarize(it) {
+    const i = it.inputs || {}, o = it.output || {};
+    if (it.kind === 'buy') return `${i.region}·${i.category} → ${o.label} (${((o.buy_probability||0)*100).toFixed(0)}%)`;
+    if (it.kind === 'sales') return `${i.category}·${i.region} → $${Number(o.predicted_sales_amount||0).toLocaleString()}`;
+    if (it.kind === 'segment') return `R${i.recency}·F${i.frequency}·M${i.monetary} → ${o.segment}`;
+    return JSON.stringify(o);
+  }
+  async function loadRecent() {
+    try {
+      const r = await fetch('/api/predictions/recent?limit=8');
+      const d = await r.json();
+      const badge = $('log-source');
+      if (badge) { badge.textContent = d.source === 'supabase' ? 'Supabase 저장' : '로컬 저장';
+        badge.className = 'log-badge ' + (d.source === 'supabase' ? 'supabase' : 'local'); }
+      const box = $('recent-list');
+      if (!box) return;
+      if (!d.items || !d.items.length) {
+        box.innerHTML = '<div class="placeholder" style="padding:14px">아직 기록이 없어요. 위에서 예측을 한 번 해보세요.</div>';
+        return;
+      }
+      box.innerHTML = d.items.map(it => {
+        const t = (it.created_at || '').replace('T', ' ').slice(0, 16);
+        const k = KIND_KO[it.kind] || it.kind;
+        return `<div class="recent-row"><span class="kind ${it.kind}">${k}</span>`
+             + `<span class="desc">${summarize(it)}</span><span class="time">${t}</span></div>`;
+      }).join('');
+    } catch (e) { /* 조용히 무시 */ }
+  }
+  loadRecent();
 
   /* 1) 매출 예측 */
   $('s-go').addEventListener('click', async () => {

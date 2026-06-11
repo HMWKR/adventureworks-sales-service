@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import data_access
 from app.services import ml_service
-from app.routers import eda, rfm, predict, insights
+from app.routers import eda, rfm, predict, insights, predictions
 from app.web.router import router as web_router
 from app.ui.gradio_app import build_demo
 
@@ -47,6 +47,7 @@ app.include_router(eda.router, prefix="/api")
 app.include_router(rfm.router, prefix="/api")
 app.include_router(predict.router, prefix="/api")
 app.include_router(insights.router, prefix="/api")
+app.include_router(predictions.router, prefix="/api")
 
 # 커스텀 스토리 대시보드 ("/")
 app.include_router(web_router)

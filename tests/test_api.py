@@ -3,6 +3,11 @@
 # 실행:  pytest -q   (또는  python -m pytest tests/ -q)
 # 데이터/모델이 없으면 lifespan 이 ETL·학습을 자동 트리거한다.
 # ------------------------------------------------------------
+import os
+# 테스트는 예측 로그를 로컬 SQLite로만 기록(네트워크/Supabase 오염 방지)
+os.environ["SUPABASE_URL"] = ""
+os.environ["SUPABASE_KEY"] = ""
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -52,6 +57,19 @@ def test_insights(client):
     data = client.get("/api/insights").json()
     assert len(data) >= 3
     assert {"icon", "title", "metric", "text"} <= set(data[0])
+
+
+def test_predictions_log(client):
+    # 예측 후 로그가 기록되고 조회되는지 (테스트는 로컬 SQLite)
+    client.post("/api/predict/buy", json={
+        "region": "Southwest", "channel": "Reseller", "category": "Bikes",
+        "prior_orders": 5, "prior_monetary": 100000})
+    r = client.get("/api/predictions/recent?limit=5")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["source"] in ("supabase", "local")
+    assert isinstance(body["items"], list) and len(body["items"]) >= 1
+    assert body["items"][0]["kind"] in ("buy", "sales", "segment")
 
 
 def test_glossary(client):

@@ -2,6 +2,7 @@
 # ------------------------------------------------------------
 # 데이터·모델 파일 경로와 도메인 상수를 한 곳에서 정의한다.
 # ------------------------------------------------------------
+import os
 from pathlib import Path
 
 # 프로젝트 루트 (app/ 의 부모)
@@ -10,6 +11,15 @@ DATA_DIR = ROOT / "data"
 MODEL_DIR = ROOT / "models"
 DATA_DIR.mkdir(exist_ok=True)
 MODEL_DIR.mkdir(exist_ok=True)
+
+# .env 로드 (로컬용; 배포 환경은 플랫폼 환경변수 사용) — 외부 의존성 없는 최소 로더
+_ENV_FILE = ROOT / ".env"
+if _ENV_FILE.exists():
+    for _line in _ENV_FILE.read_text(encoding="utf-8").splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith("#") and "=" in _line:
+            _k, _v = _line.split("=", 1)
+            os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
 # 원천 데이터 (Microsoft Power BI AdventureWorks Sales 샘플)
 EXCEL_URL = (
