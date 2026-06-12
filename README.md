@@ -1,5 +1,10 @@
 # 🚲 AdventureWorks 매출 분석·예측 서비스
 
+[![Hugging Face Spaces](https://img.shields.io/badge/Hugging%20Face-Live%20Demo-2563eb?logo=huggingface&logoColor=white)](https://huggingface.co/spaces/LeeSungMin/adventureworks-sales-service)
+
+> 🌐 **라이브 데모 (설치 없이 바로 접속)** — **https://leesungmin-adventureworks-sales-service.hf.space**
+> `/` 스토리 대시보드 · `/playground` 예측 · `/gradio` 분석 콘솔 · `/docs` API 문서
+
 > **이 문서 하나만 읽으면** 이 프로젝트가 무엇이고, 어떻게 만들어졌고, 어떻게 실행하고, 어떻게 쓰는지 전부 알 수 있습니다.
 
 Microsoft **AdventureWorks(자전거 용품 도소매)** 매출 데이터를 **수집 → 분석 → 머신러닝 예측 → 웹 서비스**로 연결한 풀 파이프라인 프로젝트입니다. 데이터 분석을 몰라도 화면을 따라가면 *"무엇이 팔리고, 누가 사고, 앞으로 어떻게 될지"* 를 1분 안에 이해할 수 있게 설계했습니다.
@@ -38,7 +43,7 @@ Microsoft **AdventureWorks(자전거 용품 도소매)** 매출 데이터를 **�
 | **설계** | MVC 레이어드 아키텍처 + Toss 스타일 디자인 시스템 |
 | **다국어** | 영어 용어의 한국어 뜻·설명 **용어집** + 대시보드 **🌐 한/영 차트 라벨 토글** + 플레이그라운드 이중표기 드롭다운 |
 | **예측 로그** | 모든 예측을 **Supabase(Postgres)** 에 기록(미설정 시 로컬 SQLite 폴백) + 플레이그라운드 "최근 예측 기록" 패널 |
-| **배포** | `Dockerfile` 제공 — Hugging Face Spaces / Render / Railway 컨테이너 배포. 상세: [DEPLOY.md](DEPLOY.md) |
+| **배포** | **🌐 라이브: [Hugging Face Spaces](https://huggingface.co/spaces/LeeSungMin/adventureworks-sales-service)** (`leesungmin-adventureworks-sales-service.hf.space`) — Docker 이미지로 배포(빌드 시 데이터·모델 자동 생성). Render/Railway 호환. 상세: [DEPLOY.md](DEPLOY.md) |
 
 ---
 
